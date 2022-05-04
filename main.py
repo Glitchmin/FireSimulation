@@ -78,31 +78,23 @@ class MyApp(ShowBase):
             pivots[wallID] = self.render.attachNewNode('pivot_%s' % wallID)
             rotations[wallID] = {"hpr": hprs[wallID], "order": wallOrders[wallID]}
 
-        for i in range(25):
-            createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
-                       i % 5 - 2.5, i // 5 - 2.5, 0)
+        for i in range(100):
+            createCube(self.render, i, cubeMembership, walls, 0.59, 0.27, 0, 1,
+                       i % 10 - 2.5, i // 10 - 2.5, 0)
 
-        for i in range(5):
-            for j in range(1, 3):
+        for i in range(10):
+            for j in range(1, 4):
                 createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
                            -2.5, -2.5 + i, j)
                 createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
-                           1.5, -2.5 + i, j)
+                           6.5, -2.5 + i, j)
 
-        for i in range(5):
-            for j in range(1, 3):
+        for i in range(10):
+            for j in range(1, 4):
                 createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
                            -2.5 + i, -2.5, j)
                 createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
-                           -2.5 + i, 1.5, j)
-
-        createCube(self.render, -1, cubeMembership, walls, 0.5, 0.25, 0, 1,
-                   -1.5, -1.5, 1)
-
-        createCube(self.render, -1, cubeMembership, walls, 0.5, 0, 1, 1,
-                   -1.5, 0.5, 1)
-        createCube(self.render, -1, cubeMembership, walls, 0.5, 0, 1, 1,
-                   -0.5, 0.5, 1)
+                           -2.5 + i, 6.5, j)
 
         self.directionalLight = DirectionalLight('directionalLight')
         self.directionalLightNP = self.cam.attachNewNode(self.directionalLight)
