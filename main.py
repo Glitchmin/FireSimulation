@@ -22,7 +22,6 @@ def createCube(parent, index, cubeMembership, walls, r, g, b, a, x, y, z):
 
             normal = VBase3()
             normal[i] = direction
-            rgb = [0., 0., 0.]
 
             color = (r, g, b, a)
 
@@ -50,25 +49,6 @@ def createCube(parent, index, cubeMembership, walls, r, g, b, a, x, y, z):
     cube.setPos(x, y, z)
     membership = set()  # the walls this cube belongs to
     cubeMembership[cube] = membership
-
-    if x == -1:
-        walls["left"].append(cube)
-        membership.add("left")
-    elif x == 1:
-        walls["right"].append(cube)
-        membership.add("right")
-    if y == -1:
-        walls["front"].append(cube)
-        membership.add("front")
-    elif y == 1:
-        walls["back"].append(cube)
-        membership.add("back")
-    if z == -1:
-        walls["bottom"].append(cube)
-        membership.add("bottom")
-    elif z == 1:
-        walls["top"].append(cube)
-        membership.add("top")
 
     return cube
 
@@ -98,9 +78,31 @@ class MyApp(ShowBase):
             pivots[wallID] = self.render.attachNewNode('pivot_%s' % wallID)
             rotations[wallID] = {"hpr": hprs[wallID], "order": wallOrders[wallID]}
 
-        for i in range(27):
-            createCube(self.render, i, cubeMembership, walls, i * 1 / 27, i * 1 / 27, i * 1 / 27, i * 1 / 13 + 0.5,
-                       i % 3-1.5, i // 3-4.5, 0)
+        for i in range(25):
+            createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
+                       i % 5 - 2.5, i // 5 - 2.5, 0)
+
+        for i in range(5):
+            for j in range(1, 3):
+                createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
+                           -2.5, -2.5 + i, j)
+                createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
+                           1.5, -2.5 + i, j)
+
+        for i in range(5):
+            for j in range(1, 3):
+                createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
+                           -2.5 + i, -2.5, j)
+                createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
+                           -2.5 + i, 1.5, j)
+
+        createCube(self.render, -1, cubeMembership, walls, 0.5, 0.25, 0, 1,
+                   -1.5, -1.5, 1)
+
+        createCube(self.render, -1, cubeMembership, walls, 0.5, 0, 1, 1,
+                   -1.5, 0.5, 1)
+        createCube(self.render, -1, cubeMembership, walls, 0.5, 0, 1, 1,
+                   -0.5, 0.5, 1)
 
         self.directionalLight = DirectionalLight('directionalLight')
         self.directionalLightNP = self.cam.attachNewNode(self.directionalLight)
