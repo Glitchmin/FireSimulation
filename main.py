@@ -103,106 +103,11 @@ class MyApp(ShowBase):
         self.cam.setPos(-7., -10., 4.)
         self.cam.lookAt(0., 0., 0.)
 
-        def reparentCubes(wallID):
-            pivot = pivots[wallID]
-            children = pivot.getChildren()
-            children.wrtReparentTo(self.render)
-            pivot.clearTransform()
-            children.wrtReparentTo(pivot)
-            for cube in walls[wallID]:
-                cube.wrtReparentTo(pivot)
-
-        def updateCubeMembership(wallID, negRotation=False):
-            wallOrder = rotations[wallID]["order"]
-            if not negRotation:
-                wallOrder = wallOrder[::-1]
-            for cube in walls[wallID]:
-                oldMembership = cubeMembership[cube]
-                newMembership = set()
-                cubeMembership[cube] = newMembership
-                for oldWallID in oldMembership:
-                    if oldWallID in wallOrder:
-                        index = wallOrder.index(oldWallID)
-                        newWallID = wallOrder[index - 1]
-                        newMembership.add(newWallID)
-                    else:
-                        newMembership.add(oldWallID)
-                for oldWallID in oldMembership - newMembership:
-                    walls[oldWallID].remove(cube)
-                for newWallID in newMembership - oldMembership:
-                    walls[newWallID].append(cube)
-
         self.seq = Sequence()
 
-        def addInterval(wallID, negRotation=False):
-            self.seq.append(Func(reparentCubes, wallID))
-            rot = rotations[wallID]["hpr"]
-            if negRotation:
-                rot = rot * -1.
-            self.seq.append(LerpHprInterval(pivots[wallID], 2.5, rot))
-            self.seq.append(Func(updateCubeMembership, wallID, negRotation))
-            "Added " + ("negative " if negRotation else "") + wallID + " rotation."
-
-        def acceptInput():
-            # <F> adds a positive Front rotation
-            self.accept("f", lambda: addInterval("front"))
-            # <Shift+F> adds a negative Front rotation
-            self.accept("shift-f", lambda: addInterval("front", True))
-            # <B> adds a positive Back rotation
-            self.accept("b", lambda: addInterval("back"))
-            # <Shift+B> adds a negative Back rotation
-            self.accept("shift-b", lambda: addInterval("back", True))
-            # <L> adds a positive Left rotation
-            self.accept("l", lambda: addInterval("left"))
-            # <Shift+L> adds a negative Left rotation
-            self.accept("shift-l", lambda: addInterval("left", True))
-            # <R> adds a positive Right rotation
-            self.accept("r", lambda: addInterval("right"))
-            # <Shift+R> adds a negative Right rotation
-            self.accept("shift-r", lambda: addInterval("right", True))
-            # <O> adds a positive bOttom rotation
-            self.accept("o", lambda: addInterval("bottom"))
-            # <Shift+O> adds a negative bOttom rotation
-            self.accept("shift-o", lambda: addInterval("bottom", True))
-            # <T> adds a positive Top rotation
-            self.accept("t", lambda: addInterval("top"))
-            # <Shift+T> adds a negative Top rotation
-            self.accept("shift-t", lambda: addInterval("top", True))
-            # <Enter> starts the sequence
-            self.accept("enter", startSequence)
-
-        def ignoreInput():
-            self.ignore("f")
-            self.ignore("shift-f")
-            self.ignore("b")
-            self.ignore("shift-b")
-            self.ignore("l")
-            self.ignore("shift-l")
-            self.ignore("r")
-            self.ignore("shift-r")
-            self.ignore("o")
-            self.ignore("shift-o")
-            self.ignore("t")
-            self.ignore("shift-t")
-            self.ignore("enter")
-
-        def startSequence():
-            # do not allow input while the sequence is playing...
-            ignoreInput()
-            # ...but accept input again once the sequence is finished
-            self.seq.append(Func(acceptInput))
-            self.seq.start()
-            "Sequence started."
-            # create a new sequence, so no new intervals will be appended to the started one
-            self.seq = Sequence()
-
-        acceptInput()
-
     def testCamera(self):
-        print("test")
         for i in range(1, 100):
             sleep(0.1)
-            print("hej")
             self.cam.setPos(i * 10, i, i)
             self.cam.lookAt(0., 0., 0.)
 
