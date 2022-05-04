@@ -5,7 +5,7 @@ from direct.showbase.ShowBase import ShowBase
 from direct.interval.IntervalGlobal import LerpHprInterval, Func, Sequence
 
 
-def createCube(parent, index, cubeMembership, walls):
+def createCube(parent, index, cubeMembership, walls, r, g, b, a, x, y, z):
     vertexFormat = GeomVertexFormat.getV3n3cp()
     vertexData = GeomVertexData("cube_data", vertexFormat, Geom.UHStatic)
     tris = GeomTriangles(Geom.UHStatic)
@@ -24,8 +24,7 @@ def createCube(parent, index, cubeMembership, walls):
             normal[i] = direction
             rgb = [0., 0., 0.]
 
-            r, g, b = rgb
-            color = (r, g, b, 1.)
+            color = (r, g, b, a)
 
             for a, b in ((-1., -1.), (-1., 1.), (1., 1.), (1., -1.)):
                 pos = VBase3()
@@ -47,9 +46,6 @@ def createCube(parent, index, cubeMembership, walls):
     node = GeomNode("cube_node")
     node.addGeom(geom)
     cube = parent.attachNewNode(node)
-    x = index % 9 // 3 - 1
-    y = index // 9 - 1
-    z = index % 9 % 3 - 1
     cube.setScale(.5)
     cube.setPos(x, y, z)
     membership = set()  # the walls this cube belongs to
@@ -103,7 +99,8 @@ class MyApp(ShowBase):
             rotations[wallID] = {"hpr": hprs[wallID], "order": wallOrders[wallID]}
 
         for i in range(27):
-            createCube(self.render, i, cubeMembership, walls)
+            createCube(self.render, i, cubeMembership, walls, i * 1 / 27, i * 1 / 27, i * 1 / 27, i * 1 / 13 + 0.5,
+                       i % 3-1.5, i // 3-4.5, 0)
 
         self.directionalLight = DirectionalLight('directionalLight')
         self.directionalLightNP = self.cam.attachNewNode(self.directionalLight)
@@ -111,7 +108,6 @@ class MyApp(ShowBase):
         self.render.setLight(self.directionalLightNP)
         self.cam.setPos(-7., -10., 4.)
         self.cam.lookAt(0., 0., 0.)
-
 
         def reparentCubes(wallID):
             pivot = pivots[wallID]
@@ -206,7 +202,6 @@ class MyApp(ShowBase):
             # create a new sequence, so no new intervals will be appended to the started one
             self.seq = Sequence()
 
-
         acceptInput()
 
     def testCamera(self):
@@ -214,11 +209,9 @@ class MyApp(ShowBase):
         for i in range(1, 100):
             sleep(0.1)
             print("hej")
-            self.cam.setPos(i*10, i, i)
+            self.cam.setPos(i * 10, i, i)
             self.cam.lookAt(0., 0., 0.)
 
 
 app = MyApp()
 app.run()
-
-
