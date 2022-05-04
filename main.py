@@ -1,53 +1,24 @@
 from time import sleep
+import sys
 
 from panda3d.core import *
 from direct.showbase.ShowBase import ShowBase
 from direct.interval.IntervalGlobal import LerpHprInterval, Func, Sequence
+from direct.showbase.ShowBase import ShowBase
+from direct.actor.Actor import Actor
+from direct.task import Task
+from direct.interval.IntervalGlobal import Sequence
+from panda3d.core import Point3, DirectionalLight, AmbientLight
 
+
+modelCube = None
 
 def createCube(parent, index, walls, r, g, b, a, x, y, z):
-    vertexFormat = GeomVertexFormat.getV3n3cp()
-    vertexData = GeomVertexData("cube_data", vertexFormat, Geom.UHStatic)
-    tris = GeomTriangles(Geom.UHStatic)
-
-    posWriter = GeomVertexWriter(vertexData, "vertex")
-    colWriter = GeomVertexWriter(vertexData, "color")
-    normalWriter = GeomVertexWriter(vertexData, "normal")
-
-    vertexCount = 0
-
-    for direction in (-1, 1):
-
-        for i in range(3):
-
-            normal = VBase3()
-            normal[i] = direction
-
-            color = (r, g, b, a)
-
-            for a, b in ((-1., -1.), (-1., 1.), (1., 1.), (1., -1.)):
-                pos = VBase3()
-                pos[i] = direction
-                pos[(i + direction) % 3] = a
-                pos[(i + direction * 2) % 3] = b
-
-                posWriter.addData3f(pos)
-                colWriter.addData4f(color)
-                normalWriter.addData3f(normal)
-
-            vertexCount += 4
-
-            tris.addVertices(vertexCount - 2, vertexCount - 3, vertexCount - 4)
-            tris.addVertices(vertexCount - 4, vertexCount - 1, vertexCount - 2)
-
-    geom = Geom(vertexData)
-    geom.addPrimitive(tris)
-    node = GeomNode("cube_node")
-    node.addGeom(geom)
-    cube = parent.attachNewNode(node)
+    modelCube.setColor(r, g, b, a)
+    cube = modelCube.copyTo(parent)
     cube.setScale(.5)
     cube.setPos(x, y, z)
-    membership = set()  # the walls this cube belongs to
+    # membership = set()  # the walls this cube belongs to
 
     return cube
 
@@ -61,6 +32,9 @@ class MyApp(ShowBase):
         walls = {}
         pivots = {}
         rotations = {}
+
+        global modelCube
+        modelCube = loader.loadModel("cube.egg")
 
 
         for i in range(100):
