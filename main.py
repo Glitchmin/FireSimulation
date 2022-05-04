@@ -5,7 +5,7 @@ from direct.showbase.ShowBase import ShowBase
 from direct.interval.IntervalGlobal import LerpHprInterval, Func, Sequence
 
 
-def createCube(parent, index, cubeMembership, walls, r, g, b, a, x, y, z):
+def createCube(parent, index, walls, r, g, b, a, x, y, z):
     vertexFormat = GeomVertexFormat.getV3n3cp()
     vertexData = GeomVertexData("cube_data", vertexFormat, Geom.UHStatic)
     tris = GeomTriangles(Geom.UHStatic)
@@ -48,7 +48,6 @@ def createCube(parent, index, cubeMembership, walls, r, g, b, a, x, y, z):
     cube.setScale(.5)
     cube.setPos(x, y, z)
     membership = set()  # the walls this cube belongs to
-    cubeMembership[cube] = membership
 
     return cube
 
@@ -62,54 +61,40 @@ class MyApp(ShowBase):
         walls = {}
         pivots = {}
         rotations = {}
-        cubeMembership = {}
-        wallIDs = ("front", "back", "left", "right", "bottom", "top")
-        hprs = {}
-        hprs["front"] = hprs["back"] = VBase3(0., 0., 90.)
-        hprs["left"] = hprs["right"] = VBase3(0., 90., 0.)
-        hprs["bottom"] = hprs["top"] = VBase3(90., 0., 0.)
-        wallOrders = {}
-        wallOrders["front"] = wallOrders["back"] = ["left", "top", "right", "bottom"]
-        wallOrders["left"] = wallOrders["right"] = ["back", "top", "front", "bottom"]
-        wallOrders["bottom"] = wallOrders["top"] = ["left", "front", "right", "back"]
 
-        for wallID in wallIDs:
-            walls[wallID] = []
-            pivots[wallID] = self.render.attachNewNode('pivot_%s' % wallID)
-            rotations[wallID] = {"hpr": hprs[wallID], "order": wallOrders[wallID]}
 
         for i in range(100):
-            createCube(self.render, i, cubeMembership, walls, 0.59, 0.27, 0, 1,
+            createCube(self.render, i, walls, 0.59, 0.27, 0, 1,
                        i % 10 - 2.5, i // 10 - 2.5, 0)
 
         for i in range(10):
             for j in range(1, 4):
-                createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
+                createCube(self.render, i, walls, 1, 1, 1, 1,
                            -2.5, -2.5 + i, j)
-                createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
+                createCube(self.render, i, walls, 1, 1, 1, 1,
                            6.5, -2.5 + i, j)
 
         for i in range(10):
             for j in range(1, 4):
-                createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
+                createCube(self.render, i, walls, 1, 1, 1, 1,
                            -2.5 + i, -2.5, j)
-                createCube(self.render, i, cubeMembership, walls, 1, 1, 1, 1,
+                createCube(self.render, i, walls, 1, 1, 1, 1,
                            -2.5 + i, 6.5, j)
 
         self.directionalLight = DirectionalLight('directionalLight')
         self.directionalLightNP = self.cam.attachNewNode(self.directionalLight)
         self.directionalLightNP.setHpr(-20., -20., 0.)
         self.render.setLight(self.directionalLightNP)
-        self.cam.setPos(-7., -10., 4.)
-        self.cam.lookAt(0., 0., 0.)
+        # self.cam.setPos(-7., -10., 4.)
+        # self.cam.lookAt(0., 0., 0.)
 
         self.seq = Sequence()
-
-    def testCamera(self):
-        for i in range(1, 100):
-            sleep(0.1)
-            self.cam.setPos(i * 10, i, i)
-            self.cam.lookAt(0., 0., 0.)
+    #
+    # def testCamera(self):
+    #     for i in range(1, 100):
+    #         sleep(0.1)
+    #         self.cam.setPos(i * 10, i, i)
+    #         self.cam.lookAt(0., 0., 0.)
 
 
 app = MyApp()
