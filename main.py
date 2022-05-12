@@ -1,75 +1,54 @@
-from time import sleep
-import sys
+from ursina import *
+from ursina.prefabs.first_person_controller import FirstPersonController
 
-from panda3d.core import *
-from direct.showbase.ShowBase import ShowBase
-from direct.interval.IntervalGlobal import LerpHprInterval, Func, Sequence
-from direct.showbase.ShowBase import ShowBase
-from direct.actor.Actor import Actor
-from direct.task import Task
-from direct.interval.IntervalGlobal import Sequence
-from panda3d.core import Point3, DirectionalLight, AmbientLight
+app = Ursina()
+window.title = 'My Game'  # The window title
+window.borderless = False  # Show a border
+window.fullscreen = False  # Do not go Fullscreen
+window.exit_button.visible = False  # Do not show the in-game red X that loses the window
+window.fps_counter.enabled = True  # Show the FPS (Frames per second) counter
 
 
-modelCube = None
+class Voxel(Button):
+    def __init__(self, position=(0, 0, 0)):
+        super().__init__(
+            parent=scene,
+            position=position,
+            model='cube',
+            origin_y=.5,
+            texture='white_cube',
+            color=color.color(0, 0, random.uniform(.9, 1.0)),
+            highlight_color=color.lime,
+        )
 
-def createCube(parent, index, walls, r, g, b, a, x, y, z):
-    modelCube.setColor(r, g, b, a)
-    cube = modelCube.copyTo(parent)
-    cube.setScale(.5)
-    cube.setPos(x, y, z)
-    # membership = set()  # the walls this cube belongs to
-
-    return cube
-
-
-class MyApp(ShowBase):
-
-    def __init__(self):
-
-        ShowBase.__init__(self)
-
-        walls = {}
-        pivots = {}
-        rotations = {}
-
-        global modelCube
-        modelCube = loader.loadModel("cube.egg")
-
-
-        for i in range(100):
-            createCube(self.render, i, walls, 0.59, 0.27, 0, 1,
-                       i % 10 - 2.5, i // 10 - 2.5, 0)
-
-        for i in range(10):
-            for j in range(1, 4):
-                createCube(self.render, i, walls, 1, 1, 1, 1,
-                           -2.5, -2.5 + i, j)
-                createCube(self.render, i, walls, 1, 1, 1, 1,
-                           6.5, -2.5 + i, j)
-
-        for i in range(10):
-            for j in range(1, 4):
-                createCube(self.render, i, walls, 1, 1, 1, 1,
-                           -2.5 + i, -2.5, j)
-                createCube(self.render, i, walls, 1, 1, 1, 1,
-                           -2.5 + i, 6.5, j)
-
-        self.directionalLight = DirectionalLight('directionalLight')
-        self.directionalLightNP = self.cam.attachNewNode(self.directionalLight)
-        self.directionalLightNP.setHpr(-20., -20., 0.)
-        self.render.setLight(self.directionalLightNP)
-        # self.cam.setPos(-7., -10., 4.)
-        # self.cam.lookAt(0., 0., 0.)
-
-        self.seq = Sequence()
+    # def input(self, key):
+    #     if self.hovered:
+    #         if key == 'left mouse down':
+    #             voxel = Voxel(position=self.position + mouse.normal)
     #
-    # def testCamera(self):
-    #     for i in range(1, 100):
-    #         sleep(0.1)
-    #         self.cam.setPos(i * 10, i, i)
-    #         self.cam.lookAt(0., 0., 0.)
+    #         if key == 'right mouse down':
+    #             destroy(self)
 
 
-app = MyApp()
-app.run()
+for z in range(8):
+    for x in range(8):
+        voxel = Voxel(position=(x, 0, z))
+
+if __name__ == "__main__":
+
+    # def update():
+
+    def input(key):
+        # if mouse.world_point:
+        #     print(mouse.world_point)
+        #     print(camera.world_position)
+        #     print(camera.forward)
+        if key == 'left mouse down':
+            if mouse.world_point is not None:
+                hit_info = raycast(camera.world_position, mouse.world_point - camera.world_position, distance=inf)
+                if hit_info.hit:
+                    Voxel(position=hit_info.entity.position + hit_info.normal)
+
+
+    player = EditorCamera()
+    app.run()
