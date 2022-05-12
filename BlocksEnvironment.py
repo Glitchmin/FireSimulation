@@ -1,11 +1,13 @@
 from ursina import *
 
 from Cell import Cell
+from CellGenerator import CellGenerator
 
 
 class BlocksEnvironment(Entity):
     def __init__(self, x_size: int, y_size: int, z_size: int, **kwargs):
         super().__init__(**kwargs)
+        self.cell_generator = CellGenerator()
         self.cells = [[[None for _ in range(z_size)] for _ in range(y_size)] for _ in range(x_size)]
         self.size = (x_size, y_size, z_size)
         for z in range(z_size):
@@ -13,11 +15,11 @@ class BlocksEnvironment(Entity):
                 self.create_cell((x, 0, z))
 
     def create_cell(self, position):
-        position = [int(a) for a in position]
+        position = tuple([int(a) for a in position])
         for pos1d, size1d in zip(position, self.size):
             if not (0 <= pos1d < size1d):
                 return
-        self.cells[position[0]][position[1]][position[2]] = Cell(position=position)
+        self.cells[position[0]][position[1]][position[2]] = self.cell_generator.get_cell(position)
 
     def remove_cell(self, position):
         position = [int(a) for a in position]
