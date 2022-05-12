@@ -4,14 +4,14 @@ from MaterialProperties import MaterialProperties
 
 
 class Voxel(Button):
-    def __init__(self, position=(0, 0, 0)):
+    def __init__(self, position, color_hsv):
         super().__init__(
             parent=scene,
             position=position,
             model='cube',
             origin_y=.5,
             texture='white_cube',
-            color=color.color(0, 0, random.uniform(.9, 1.0)),
+            color=color.color(*color_hsv),
             highlight_color=color.lime,
         )
 
@@ -26,5 +26,5 @@ class Voxel(Button):
 
 class Cell:
     def __init__(self, position, material_properties: MaterialProperties):
-        self.voxel = Voxel(position)
+        self.voxel = Voxel(position, material_properties.color)
         self.material_properties = material_properties
