@@ -6,8 +6,18 @@ from MaterialProperties import MaterialProperties
 
 class CellGenerator:
     def __init__(self):
-        self.default_material_id = 1
-        self.material_defs = {1: MaterialProperties(1, 400, (100, 0.3, 0.9))}
+        self._default_material_id = 1
+        self.material_defs = {1: MaterialProperties(1, 400, (100, 0.3, 0.9)),
+                              2: MaterialProperties(2, 1000, (0, 0.3, 0.9))}
+
+    @property
+    def default_material_id(self):
+        return self._default_material_id
+
+    @default_material_id.setter
+    def default_material_id(self, new_id):
+        if new_id in self.material_defs.keys():
+            self._default_material_id = new_id
 
     def get_cell(self, position: Tuple, material_id: int = None):
         if material_id is None:

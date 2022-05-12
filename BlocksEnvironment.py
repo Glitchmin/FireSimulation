@@ -1,3 +1,5 @@
+import string
+
 from ursina import *
 
 from Cell import Cell
@@ -49,3 +51,9 @@ class BlocksEnvironment(Entity):
                 if hit_info.hit:
                     position = hit_info.entity.position
                     self.remove_cell(position)
+        if key == '1':
+            self.cell_generator.default_material_id = 1
+        if key == '2':
+            self.cell_generator.default_material_id = 2
+
+
