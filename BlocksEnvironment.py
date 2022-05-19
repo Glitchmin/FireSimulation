@@ -21,7 +21,8 @@ class BlocksEnvironment(Entity):
         for pos1d, size1d in zip(position, self.size):
             if not (0 <= pos1d < size1d):
                 return
-        self.cells[position[0]][position[1]][position[2]] = self.cell_generator.get_cell(position)
+        if self.cells[position[0]][position[1]][position[2]] is None:
+            self.cells[position[0]][position[1]][position[2]] = self.cell_generator.get_cell(position)
 
     def remove_cell(self, position):
         position = [int(a) for a in position]
@@ -51,9 +52,10 @@ class BlocksEnvironment(Entity):
                 if hit_info.hit:
                     position = hit_info.entity.position
                     self.remove_cell(position)
-        if key == '1':
-            self.cell_generator.default_material_id = 1
-        if key == '2':
-            self.cell_generator.default_material_id = 2
+
+        for id in self.cell_generator.material_defs.keys():
+            if key == str(id):
+                self.cell_generator.default_material_id = id
+
 
 

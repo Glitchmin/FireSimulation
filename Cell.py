@@ -12,7 +12,7 @@ class Voxel(Button):
             origin_y=.5,
             texture='white_cube',
             color=color.color(*color_hsv),
-            highlight_color=color.lime,
+            highlight_color=color.color(color_hsv[0], min(1, color_hsv[1]*1.3), 1),
         )
 
     # def input(self, key):

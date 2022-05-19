@@ -7,8 +7,10 @@ from MaterialProperties import MaterialProperties
 class CellGenerator:
     def __init__(self):
         self._default_material_id = 1
-        self.material_defs = {1: MaterialProperties(1, 400, (100, 0.3, 0.9)),
-                              2: MaterialProperties(2, 1000, (0, 0.3, 0.9))}
+        self.material_defs = {1: MaterialProperties(1, "name_1", 400, (100, 0.3, 0.9)),
+                              2: MaterialProperties(2, "name_2", 1000, (200, 0.5, 0.9)),
+                              3: MaterialProperties(3, "name_3", 1000, (0, 0.0, 0.5, 0.5)),
+                              4: MaterialProperties(4, "name_4", 1000, (0, 0.7, 0.9, 0.8))}
 
     @property
     def default_material_id(self):
