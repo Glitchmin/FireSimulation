@@ -72,6 +72,3 @@ class BlocksEnvironment(Entity):
         for id in self.cell_generator.material_defs.keys():
             if key == str(id):
                 self.cell_generator.default_material_id = id
-
-
-
