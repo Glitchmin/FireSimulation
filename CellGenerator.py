@@ -2,6 +2,7 @@ from typing import Tuple
 
 from Cell import Cell
 from MaterialProperties import MaterialProperties
+from StateProperties import StateProperties
 
 
 class CellGenerator:
@@ -25,4 +26,4 @@ class CellGenerator:
         if material_id is None:
             material_id = self.default_material_id
 
-        return Cell(position, self.material_defs[material_id])
+        return Cell(position, self.material_defs[material_id], StateProperties())

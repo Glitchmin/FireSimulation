@@ -1,8 +1,7 @@
-import string
-
 from ursina import *
 
 from MaterialProperties import MaterialProperties
+from StateProperties import StateProperties
 
 
 class Voxel(Button):
@@ -14,7 +13,7 @@ class Voxel(Button):
             origin_y=.5,
             texture='white_cube',
             color=color.color(*color_hsv),
-            highlight_color=color.color(color_hsv[0], min(1, color_hsv[1] * 1.3), 1),
+            highlight_color=color.color(color_hsv[0], min(1, color_hsv[1]*1.3), 1),
         )
 
     # def input(self, key):
@@ -27,9 +26,11 @@ class Voxel(Button):
 
 
 class Cell:
-    def __init__(self, position, material_properties: MaterialProperties):
+    def __init__(self, position, material_properties: MaterialProperties, state: StateProperties):
         self.voxel = Voxel(position, material_properties.color)
         self.material_properties = material_properties
+        self.state = state
+        self.next_state = state
 
     def toString(self):
         return str(self.material_properties.id)
