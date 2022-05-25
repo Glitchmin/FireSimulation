@@ -12,27 +12,31 @@ class Voxel(Button):
             model='cube',
             origin_y=.5,
             texture='white_cube',
-            # color=color.color(*color_hsv),
-            color=color.rgb(*ColorToTemperature().convert_K_to_RGB(290)),
+            color=color.color(*color_hsv),
+            # color=color.rgb(*ColorToTemperature().convert_K_to_RGB(290)),
             highlight_color=color.color(color_hsv[0], min(1, color_hsv[1]*1.3), 1),
         )
 
 
-    # def input(self, key):
-    #     if self.hovered:
-    #         if key == 'left mouse down':
-    #             voxel = Voxel(position=self.position + mouse.normal)
-    #
-    #         if key == 'x':
-    #             destroy(self)
 
 
-class Cell:
-    def __init__(self, position, material_properties: MaterialProperties, state: StateProperties):
-        self.voxel = Voxel(position, material_properties.color)
+class Cell(Entity):
+    def __init__(self, position, material_properties: MaterialProperties, state: StateProperties, **kwargs):
+        super().__init__(**kwargs)
         self.material_properties = material_properties
         self.state = state
         self.next_state = state
+        self.voxel = Voxel(position, material_properties.color)
 
     def toString(self):
         return str(self.material_properties.id)
+
+    def input(self, key):
+        if key == 'g':
+            self.voxel.color = color.rgb(*ColorToTemperature().convert_K_to_RGB(self.state.temperature))
+
+    def update_voxel(self, thermal_mode):
+        if thermal_mode:
+            self.voxel.color = color.rgb(*ColorToTemperature().convert_K_to_RGB(self.state.temperature))
+        else:
+            self.voxel.color = color.color(*self.material_properties.color)
