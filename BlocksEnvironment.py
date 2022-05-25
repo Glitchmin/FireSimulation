@@ -1,5 +1,6 @@
 import string
 
+from RoomSaver import RoomSaver
 from ursina import *
 
 from Cell import Cell
@@ -53,9 +54,21 @@ class BlocksEnvironment(Entity):
                     position = hit_info.entity.position
                     self.remove_cell(position)
 
+        if key == 's' and held_keys['left control']:
+            print("saving...")
+            RoomSaver.save_room(self.cells)
+            print("saving finished")
+
+        if key == 'l' and held_keys['left control']:
+            print("loading...")
+            for i in range(len(self.cells)):
+                for j in range(len(self.cells[i])):
+                    for k in range(len(self.cells[i][j])):
+                        if self.cells[i][j][k] is not None:
+                            self.remove_cell([i, j, k])
+            RoomSaver.load_room(self.cells, self.cell_generator)
+            print("loading finished")
+
         for id in self.cell_generator.material_defs.keys():
             if key == str(id):
                 self.cell_generator.default_material_id = id
-
-
-
