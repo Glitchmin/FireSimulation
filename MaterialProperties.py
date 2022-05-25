@@ -6,5 +6,5 @@ from typing import Tuple
 class MaterialProperties:
     id: int
     name: str
-    specific_head: float
+    specific_heat: float
     color: Tuple

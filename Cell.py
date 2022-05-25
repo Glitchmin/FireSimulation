@@ -1,6 +1,7 @@
 from ursina import *
 
 from MaterialProperties import MaterialProperties
+from StateProperties import StateProperties
 
 
 class Voxel(Button):
@@ -25,6 +26,8 @@ class Voxel(Button):
 
 
 class Cell:
-    def __init__(self, position, material_properties: MaterialProperties):
+    def __init__(self, position, material_properties: MaterialProperties, state: StateProperties):
         self.voxel = Voxel(position, material_properties.color)
         self.material_properties = material_properties
+        self.state = state
+        self.next_state = state

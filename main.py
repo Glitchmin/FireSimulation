@@ -15,6 +15,6 @@ if __name__ == "__main__":
 
     env = BlocksEnvironment(15, 15, 15)
 
-    # player = EditorCamera()
-    player = FirstPersonController()
+    player = EditorCamera()
+    # player = FirstPersonController()
     app.run()
