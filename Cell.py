@@ -31,6 +31,13 @@ class Cell:
         self.material_properties = material_properties
         self.state = state
         self.next_state = state
+        self.neighbors = []
 
-    def toString(self):
+    def to_string(self):
         return str(self.material_properties.id)
+
+    def add_neighbor(self, neighbor):
+        self.neighbors.append(neighbor)
+
+    def calc_next_state(self):
+        pass

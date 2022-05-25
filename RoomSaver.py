@@ -2,6 +2,7 @@ import csv
 
 
 class RoomSaver:
+    @staticmethod
     def save_room(cells):
         with open('savefile.csv', 'w', newline='') as f:
             writer = csv.writer(f)
@@ -10,8 +11,9 @@ class RoomSaver:
                 for j in range(len(cells[i])):
                     for k in range(len(cells[i][j])):
                         if cells[i][j][k] is not None:
-                            writer.writerow([i, j, k, cells[i][j][k].toString()])
+                            writer.writerow([i, j, k, cells[i][j][k].to_string()])
 
+    @staticmethod
     def load_room(cells, cellGenerator):
         with open('savefile.csv', mode='r') as f:
             csv_reader = csv.DictReader(f)
