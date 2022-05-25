@@ -1,7 +1,7 @@
 from ursina import *
-
 from MaterialProperties import MaterialProperties
 from StateProperties import StateProperties
+from ColorToTemperature import ColorToTemperature
 
 
 class Voxel(Button):
@@ -12,7 +12,8 @@ class Voxel(Button):
             model='cube',
             origin_y=.5,
             texture='white_cube',
-            color=color.color(*color_hsv),
+            # color=color.color(*color_hsv),
+            color=color.rgb(*ColorToTemperature().convert_K_to_RGB(290)),
             highlight_color=color.color(color_hsv[0], min(1, color_hsv[1]*1.3), 1),
         )
 
@@ -32,3 +33,6 @@ class Cell:
         self.material_properties = material_properties
         self.state = state
         self.next_state = state
+
+    def toString(self):
+        return str(self.material_properties.id)
