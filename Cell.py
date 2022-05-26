@@ -45,5 +45,5 @@ class Cell(Entity):
     def add_neighbor(self, neighbor):
         self.neighbors.append(neighbor)
 
-    def calc_next_state(self):
+    def calc_next_state(self, time_ms):
         pass
