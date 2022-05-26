@@ -2,6 +2,7 @@ from ursina import *
 from MaterialProperties import MaterialProperties
 from StateProperties import StateProperties
 from ColorToTemperature import ColorToTemperature
+from constants import BLOCK_SIZE_M
 
 
 class Voxel(Button):
@@ -45,5 +46,14 @@ class Cell(Entity):
     def add_neighbor(self, neighbor):
         self.neighbors.append(neighbor)
 
-    def calc_next_state(self, time_ms):
-        pass
+    def calc_next_state(self, time_s):
+        heat = 0
+        for neighbor in self.neighbors:
+            R1 = BLOCK_SIZE_M/2 / self.material_properties.conductivity
+            R2 = BLOCK_SIZE_M/2 / neighbor.material_properties.conductivity
+            R = R1 + R2
+            U = 1 / R
+            q = U * BLOCK_SIZE_M * BLOCK_SIZE_M * (self.state.temperature - neighbor.state.temperature)
+            heat += q
+        heat *= time_s
+        self.state.temperature += heat / self.material_properties.specific_heat
