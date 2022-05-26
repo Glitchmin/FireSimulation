@@ -49,11 +49,16 @@ class Cell(Entity):
     def calc_next_state(self, time_s):
         heat = 0
         for neighbor in self.neighbors:
-            R1 = BLOCK_SIZE_M/2 / self.material_properties.conductivity
-            R2 = BLOCK_SIZE_M/2 / neighbor.material_properties.conductivity
-            R = R1 + R2
-            U = 1 / R
-            q = U * BLOCK_SIZE_M * BLOCK_SIZE_M * (self.state.temperature - neighbor.state.temperature)
-            heat += q
+            if neighbor is not None:
+                R1 = BLOCK_SIZE_M/2 / self.material_properties.conductivity
+                R2 = BLOCK_SIZE_M/2 / neighbor.material_properties.conductivity
+                R = R1 + R2
+                U = 1 / R
+                q = U * BLOCK_SIZE_M * BLOCK_SIZE_M * (neighbor.state.temperature - self.state.temperature)
+                heat += q * 1000000
         heat *= time_s
-        self.state.temperature += heat / self.material_properties.specific_heat
+        self.next_state.temperature += heat / (self.material_properties.specific_heat * self.material_properties.density)
+        if(self.next_state.temperature != 290):
+            print(self.next_state.temperature)
+
+

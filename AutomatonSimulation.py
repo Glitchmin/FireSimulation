@@ -4,7 +4,8 @@ from BlocksEnvironment import BlocksEnvironment
 class AutomatonSimulation:
     def __init__(self, block_environment: BlocksEnvironment):
         self.block_environment = block_environment
-        self.s_for_every_step = 0.1
+        self.s_for_every_step = 10
+        self.block_environment.cells[0][0][0].state.temperature = 1200
         for x in range(self.block_environment.size[0]):
             for y in range(self.block_environment.size[1]):
                 for z in range(self.block_environment.size[2]):
@@ -28,9 +29,11 @@ class AutomatonSimulation:
                 for z in range(self.block_environment.size[2]):
                     if self.block_environment.cells[x][y][z] is not None:
                         self.block_environment.cells[x][y][z].calc_next_state(self.s_for_every_step)
+        print()
 
         for x in range(self.block_environment.size[0]):
             for y in range(self.block_environment.size[1]):
                 for z in range(self.block_environment.size[2]):
                     if self.block_environment.cells[x][y][z] is not None:
                         self.block_environment.cells[x][y][z].state = self.block_environment.cells[x][y][z].next_state
+        self.block_environment.refresh_voxels()
