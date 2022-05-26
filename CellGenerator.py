@@ -1,3 +1,4 @@
+from math import inf
 from typing import Tuple
 
 from Cell import Cell
@@ -8,10 +9,15 @@ from StateProperties import StateProperties
 class CellGenerator:
     def __init__(self):
         self._default_material_id = 1
-        self.material_defs = {1: MaterialProperties(1, "name_1", 400, (100, 0.3, 0.9)),
-                              2: MaterialProperties(2, "name_2", 1000, (200, 0.5, 0.9)),
-                              3: MaterialProperties(3, "name_3", 1000, (0, 0.0, 0.5, 0.5)),
-                              4: MaterialProperties(4, "name_4", 1000, (0, 0.7, 0.9, 0.8))}
+        self.material_defs = {
+            0: MaterialProperties(0, "air", color=(0, 0, 0, 0), specific_heat=1.0, density=1.225, conductivity=0.025,
+                                  autoignition_temp=inf),
+            1: MaterialProperties(0, "air", color=(100, 0.3, 0.9), specific_heat=2400, density=500, conductivity=0.2,
+                                  autoignition_temp=250),
+            # 2: MaterialProperties(2, "name_2", 1000, (200, 0.5, 0.9)),
+            # 3: MaterialProperties(3, "name_3", 1000, (0, 0.0, 0.5, 0.5)),
+            # 4: MaterialProperties(4, "name_4", 1000, (0, 0.7, 0.9, 0.8))
+        }
 
     @property
     def default_material_id(self):

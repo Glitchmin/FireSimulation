@@ -6,5 +6,8 @@ from typing import Tuple
 class MaterialProperties:
     id: int
     name: str
-    specific_heat: float
     color: Tuple
+    specific_heat: float        # J/(K*kg)
+    density: float              # kg/m^3
+    conductivity: float         # W/(m*K)
+    autoignition_temp: float    # K
