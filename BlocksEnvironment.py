@@ -13,6 +13,8 @@ class BlocksEnvironment(Entity):
         self.cell_generator = CellGenerator()
         self.cells = [[[None for _ in range(z_size)] for _ in range(y_size)] for _ in range(x_size)]
         self.size = (x_size, y_size, z_size)
+        self.thermal_camera_mode = False
+
         for z in range(z_size):
             for x in range(x_size):
                 self.create_cell((x, 0, z))
@@ -24,6 +26,7 @@ class BlocksEnvironment(Entity):
                 return
         if self.cells[position[0]][position[1]][position[2]] is None:
             self.cells[position[0]][position[1]][position[2]] = self.cell_generator.get_cell(position)
+            self.cells[position[0]][position[1]][position[2]].update_voxel(self.thermal_camera_mode)
 
     def remove_cell(self, position):
         position = [int(a) for a in position]
@@ -34,6 +37,17 @@ class BlocksEnvironment(Entity):
         if self.cells[position[0]][position[1]][position[2]] is not None:
             destroy(self.cells[position[0]][position[1]][position[2]].voxel)
             self.cells[position[0]][position[1]][position[2]] = None
+
+    def refresh_voxels(self):
+        for x in range(self.size[0]):
+            for y in range(self.size[1]):
+                for z in range(self.size[2]):
+                    if self.cells[x][y][z] is not None:
+                        self.cells[x][y][z].update_voxel(self.thermal_camera_mode)
+
+    def switch_view_mode(self):
+        self.thermal_camera_mode = not self.thermal_camera_mode
+        self.refresh_voxels()
 
     def input(self, key):
         # pass
