@@ -1,4 +1,5 @@
 import string
+from typing import Union
 
 from RoomSaver import RoomSaver
 from ursina import *
@@ -15,19 +16,31 @@ class BlocksEnvironment(Entity):
         self.size = (x_size, y_size, z_size)
         self.thermal_camera_mode = False
 
+        for x in range(x_size):
+            for y in range(1, y_size):
+                for z in range(z_size):
+                    self.create_cell((x, y, z), self.cell_generator.empty_material)
+
         for z in range(z_size):
             for x in range(x_size):
                 self.create_cell((x, 0, z))
 
-    def create_cell(self, position):
+    def cell_at(self, position) -> Cell:
+        position = [int(a) for a in position]
+        return self.cells[position[0]][position[1]][position[2]]
+
+    def create_cell(self, position, material_id: Union[int, None] = None):
         position = tuple([int(a) for a in position])
         for pos1d, size1d in zip(position, self.size):
             if not (0 <= pos1d < size1d):
                 return
-        if self.cells[position[0]][position[1]][position[2]] is None:
-            self.cells[position[0]][position[1]][position[2]] = self.cell_generator.get_cell(position)
-            self.cells[position[0]][position[1]][position[2]].update_voxel(self.thermal_camera_mode)
-            self.cells[position[0]][position[1]][position[2]].position = position
+        if self.cells[position[0]][position[1]][position[2]] is not None:
+            destroy(self.cells[position[0]][position[1]][position[2]].voxel)
+            self.cells[position[0]][position[1]][position[2]] = None
+
+        self.cells[position[0]][position[1]][position[2]] = self.cell_generator.get_cell(position, material_id)
+        self.cells[position[0]][position[1]][position[2]].update_voxel(self.thermal_camera_mode)
+        self.cells[position[0]][position[1]][position[2]].position = position
 
     def remove_cell(self, position):
         position = [int(a) for a in position]
@@ -37,7 +50,7 @@ class BlocksEnvironment(Entity):
 
         if self.cells[position[0]][position[1]][position[2]] is not None:
             destroy(self.cells[position[0]][position[1]][position[2]].voxel)
-            self.cells[position[0]][position[1]][position[2]] = None
+            self.create_cell(position, self.cell_generator.empty_material)
 
     def refresh_voxels(self):
         for x in range(self.size[0]):
@@ -67,7 +80,16 @@ class BlocksEnvironment(Entity):
                 hit_info = raycast(camera.world_position, mouse.world_point - camera.world_position, distance=inf)
                 if hit_info.hit:
                     position = hit_info.entity.position
+                    print(self.cell_at(position).material_properties.is_invisible(), self.cell_at(position).material_properties.is_transparent(), self.cell_at(position).material_properties.color)
                     self.remove_cell(position)
+
+        if key == 'i':
+            if mouse.world_point is not None:
+                hit_info = raycast(camera.world_position, mouse.world_point - camera.world_position, distance=inf)
+                if hit_info.hit:
+                    position = hit_info.entity.position
+                    print(self.cell_at(position).state.temperature)
+                    # self.remove_cell(position)
 
         if key == 's' and held_keys['left control']:
             print("saving...")
@@ -86,4 +108,4 @@ class BlocksEnvironment(Entity):
 
         for id in self.cell_generator.material_defs.keys():
             if key == str(id):
-                self.cell_generator.default_material_id = id
+                self.cell_generator.building_material_id = id

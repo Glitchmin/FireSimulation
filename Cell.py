@@ -55,7 +55,7 @@ class Cell(Entity):
                     self.voxel.color = Voxel.flame_color
                 else:
                     self.voxel.color = Voxel.fire_color
-            else:
+            elif not self.material_properties.is_invisible():
                 self.voxel.color = color.color(*self.material_properties.color)
 
     def add_neighbor(self, neighbor):

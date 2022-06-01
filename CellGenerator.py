@@ -8,11 +8,14 @@ from StateProperties import StateProperties
 
 class CellGenerator:
     def __init__(self):
-        self._default_material_id = 1
+        self._building_material_id = 1
+        self.empty_material = 0
         self.material_defs = {
-            0: MaterialProperties(0, "air", color=(0, 0, 0, 0), specific_heat=1.0, density=1.225, conductivity=0.025,
+            0: MaterialProperties(0, "air", color=(0, 0, 0, 0.1), specific_heat=1.,
+                                  density=1.225,
+                                  conductivity=0.025,
                                   autoignition_temp=inf),
-            1: MaterialProperties(0, "air", color=(100, 0.3, 0.9), specific_heat=2400, density=500, conductivity=0.2,
+            1: MaterialProperties(0, "wood", color=(100, 0.3, 0.9), specific_heat=2400, density=500, conductivity=0.2,
                                   autoignition_temp=273+250),
             # 2: MaterialProperties(2, "name_2", 1000, (200, 0.5, 0.9)),
             # 3: MaterialProperties(3, "name_3", 1000, (0, 0.0, 0.5, 0.5)),
@@ -20,17 +23,17 @@ class CellGenerator:
         }
 
     @property
-    def default_material_id(self):
-        return self._default_material_id
+    def building_material_id(self):
+        return self._building_material_id
 
-    @default_material_id.setter
-    def default_material_id(self, new_id):
+    @building_material_id.setter
+    def building_material_id(self, new_id):
         if new_id in self.material_defs.keys():
-            self._default_material_id = new_id
+            self._building_material_id = new_id
 
     def get_cell(self, position: Tuple, material_id: int = None):
         if material_id is None:
-            material_id = self.default_material_id
+            material_id = self.building_material_id
 
         # return Cell(position, self.material_defs[material_id], StateProperties(temperature=273+position[0]*30+position[2]*100))
         return Cell(position, self.material_defs[material_id], StateProperties())
