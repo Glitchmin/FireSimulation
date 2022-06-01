@@ -11,6 +11,7 @@ class MaterialProperties:
     density: float              # kg/m^3
     conductivity: float         # W/(m*K)
     autoignition_temp: float    # K
+    smoke_generation_s: float
 
     def is_transparent(self):
         return len(self.color) >= 4 and self.color[3] < 1

@@ -22,15 +22,13 @@ class Voxel(Button):
         )
 
 
-
-
 class Cell(Entity):
     def __init__(self, position, material_properties: MaterialProperties, state: StateProperties, **kwargs):
         super().__init__(**kwargs)
         self.material_properties = material_properties
         self.state = state
         self.next_state = copy(state)
-        self.neighbors = []
+        self.neighbors: [Cell] = []
         self.voxel = None
         self.position = position
         if not self.material_properties.is_invisible():
@@ -65,6 +63,21 @@ class Cell(Entity):
         self.next_state.is_burning = self.state.temperature >= self.material_properties.autoignition_temp
 
         self.calculate_conduction(time_s)
+        self.calculate_smoke(time_s)
+
+    def calculate_smoke(self, time_s):
+        if self.position[0] == 0 and self.position[2] == 0:
+            print(self.position, self.state.smoke_saturation, self.next_state.smoke_saturation)
+        for neighbor in self.neighbors:
+            if self.material_properties.id != 0 and neighbor.position[1] > self.position[1] and \
+                    neighbor.material_properties.id == 0 and self.state.is_burning:
+                neighbor.next_state.smoke_saturation += self.material_properties.smoke_generation_s * time_s
+            if self.material_properties.id == 0 and neighbor.position[1] > self.position[1] and \
+                    neighbor.material_properties.id == 0:
+                neighbor.next_state.smoke_saturation += self.state.smoke_saturation
+                self.next_state.smoke_saturation -= self.state.smoke_saturation
+        if self.position[0] == 0 and self.position[2] == 0:
+            print(self.position, self.state.smoke_saturation, self.next_state.smoke_saturation)
 
     def calculate_conduction(self, time_s):
         heat = 0
@@ -75,7 +88,7 @@ class Cell(Entity):
                 R = R1 + R2
                 U = 1 / R
                 q = U * BLOCK_SIZE_M * BLOCK_SIZE_M * (neighbor.state.temperature - self.state.temperature)
-                heat += q * 1e6
+                heat += q
         heat *= time_s
         self.next_state.temperature += heat / (
                 self.material_properties.specific_heat * self.material_properties.density)

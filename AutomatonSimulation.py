@@ -9,10 +9,6 @@ class AutomatonSimulation:
         self.s_for_every_step = 10
         self.block_environment.cells[0][0][0].state.temperature = 1200
         self.block_environment.cells[0][0][0].next_state.temperature = 1200
-        self.block_environment.cells[0][0][3].state.temperature = 1200
-        self.block_environment.cells[0][0][3].next_state.temperature = 1200
-        self.block_environment.cells[5][0][5].state.temperature = 1700
-        self.block_environment.cells[5][0][5].next_state.temperature = 1700
         for x in range(self.block_environment.size[0]):
             for y in range(self.block_environment.size[1]):
                 for z in range(self.block_environment.size[2]):
@@ -38,9 +34,12 @@ class AutomatonSimulation:
                         self.block_environment.cells[x][y][z].calc_next_state(self.s_for_every_step)
         print()
 
+        print(self.block_environment.cells[0][1][0].state.temperature)
+        print(self.block_environment.cells[0][1][0].next_state.temperature)
+
         for x in range(self.block_environment.size[0]):
             for y in range(self.block_environment.size[1]):
                 for z in range(self.block_environment.size[2]):
                     if self.block_environment.cells[x][y][z] is not None:
-                        self.block_environment.cells[x][y][z].state = self.block_environment.cells[x][y][z].next_state
+                        self.block_environment.cells[x][y][z].state = copy(self.block_environment.cells[x][y][z].next_state)
         self.block_environment.refresh_voxels()
