@@ -15,10 +15,8 @@ class Voxel(Button):
             texture='white_cube',
             color=color.color(*color_hsv),
             # color=color.rgb(*ColorToTemperature().convert_K_to_RGB(290)),
-            highlight_color=color.color(color_hsv[0], min(1, color_hsv[1]*1.3), 1),
+            highlight_color=color.color(color_hsv[0], min(1, color_hsv[1] * 1.3), 1),
         )
-
-
 
 
 class Cell(Entity):
@@ -26,7 +24,7 @@ class Cell(Entity):
         super().__init__(**kwargs)
         self.material_properties = material_properties
         self.state = state
-        self.next_state = state
+        self.next_state = copy(state)
         self.neighbors = []
         self.voxel = Voxel(position, material_properties.color)
 
@@ -48,17 +46,16 @@ class Cell(Entity):
 
     def calc_next_state(self, time_s):
         heat = 0
+
         for neighbor in self.neighbors:
             if neighbor is not None:
-                R1 = BLOCK_SIZE_M/2 / self.material_properties.conductivity
-                R2 = BLOCK_SIZE_M/2 / neighbor.material_properties.conductivity
+                R1 = BLOCK_SIZE_M / 2 / self.material_properties.conductivity
+                R2 = BLOCK_SIZE_M / 2 / neighbor.material_properties.conductivity
                 R = R1 + R2
                 U = 1 / R
                 q = U * BLOCK_SIZE_M * BLOCK_SIZE_M * (neighbor.state.temperature - self.state.temperature)
-                heat += q * 1000000
+                heat += q*1000*1000
         heat *= time_s
-        self.next_state.temperature += heat / (self.material_properties.specific_heat * self.material_properties.density)
-        if(self.next_state.temperature != 290):
-            print(self.next_state.temperature)
-
-
+        self.next_state.temperature += heat / (
+                self.material_properties.specific_heat * self.material_properties.density)
+        # print(self.next_state.temperature)

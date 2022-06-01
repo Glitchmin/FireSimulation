@@ -27,6 +27,7 @@ class BlocksEnvironment(Entity):
         if self.cells[position[0]][position[1]][position[2]] is None:
             self.cells[position[0]][position[1]][position[2]] = self.cell_generator.get_cell(position)
             self.cells[position[0]][position[1]][position[2]].update_voxel(self.thermal_camera_mode)
+            self.cells[position[0]][position[1]][position[2]].position = position
 
     def remove_cell(self, position):
         position = [int(a) for a in position]
