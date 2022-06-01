@@ -1,3 +1,5 @@
+from time import sleep
+
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 
@@ -22,7 +24,6 @@ def start_sim():
     sim_button.on_click = sim.next_step
     sim_tooltip = Tooltip('calculate next step of the simulation')
     sim_button.tooltip = sim_tooltip
-
 
 if __name__ == "__main__":
     # def update():

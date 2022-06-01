@@ -66,6 +66,9 @@ class Cell(Entity):
 
         self.calculate_conduction(time_s)
 
+    def heat(self):
+        return self.state.temperature * self.material_properties.specific_heat * self.material_properties.density * BLOCK_SIZE_M**3
+
     def calculate_conduction(self, time_s):
         heat = 0
         for neighbor in self.neighbors:
@@ -75,8 +78,12 @@ class Cell(Entity):
                 R = R1 + R2
                 U = 1 / R
                 q = U * BLOCK_SIZE_M * BLOCK_SIZE_M * (neighbor.state.temperature - self.state.temperature)
-                heat += q * 1e6
+                heat += q
         heat *= time_s
+
         self.next_state.temperature += heat / (
-                self.material_properties.specific_heat * self.material_properties.density)
+                self.material_properties.specific_heat * self.material_properties.density * BLOCK_SIZE_M**3)
+        if(self.next_state.temperature < 0):
+            do_nothing = None
+        #K += K*m^3
         # print(self.next_state.temperature)
