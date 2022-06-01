@@ -66,8 +66,6 @@ class Cell(Entity):
         self.calculate_smoke(time_s)
 
     def calculate_smoke(self, time_s):
-        if self.position[0] == 0 and self.position[2] == 0:
-            print(self.position, self.state.smoke_saturation, self.next_state.smoke_saturation)
         for neighbor in self.neighbors:
             if self.material_properties.id != 0 and neighbor.position[1] > self.position[1] and \
                     neighbor.material_properties.id == 0 and self.state.is_burning:
@@ -76,8 +74,6 @@ class Cell(Entity):
                     neighbor.material_properties.id == 0:
                 neighbor.next_state.smoke_saturation += self.state.smoke_saturation
                 self.next_state.smoke_saturation -= self.state.smoke_saturation
-        if self.position[0] == 0 and self.position[2] == 0:
-            print(self.position, self.state.smoke_saturation, self.next_state.smoke_saturation)
 
     def calculate_conduction(self, time_s):
         heat = 0
