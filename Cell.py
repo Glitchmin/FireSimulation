@@ -6,6 +6,9 @@ from constants import BLOCK_SIZE_M
 
 
 class Voxel(Button):
+    fire_color = color.color(0, 0.8, 1)
+    flame_color = color.color(0, 0.8, 1, 0.5)
+
     def __init__(self, position, color_hsv):
         super().__init__(
             parent=scene,
@@ -19,6 +22,8 @@ class Voxel(Button):
         )
 
 
+
+
 class Cell(Entity):
     def __init__(self, position, material_properties: MaterialProperties, state: StateProperties, **kwargs):
         super().__init__(**kwargs)
@@ -26,7 +31,10 @@ class Cell(Entity):
         self.state = state
         self.next_state = copy(state)
         self.neighbors = []
-        self.voxel = Voxel(position, material_properties.color)
+        self.voxel = None
+        self.position = position
+        if not self.material_properties.is_invisible():
+            self.voxel = Voxel(position, material_properties.color)
 
     def to_string(self):
         return str(self.material_properties.id)
@@ -37,16 +45,29 @@ class Cell(Entity):
 
     def update_voxel(self, thermal_mode):
         if thermal_mode:
-            self.voxel.color = color.rgb(*ColorToTemperature().convert_K_to_RGB(self.state.temperature))
+            if not self.material_properties.is_invisible():
+                self.voxel.color = color.rgb(*ColorToTemperature().convert_K_to_RGB(self.state.temperature))
         else:
-            self.voxel.color = color.color(*self.material_properties.color)
+            if self.state.is_burning:
+                if self.voxel is None:
+                    self.voxel = Voxel(self.position, self.material_properties.color)
+                if self.material_properties.is_transparent():
+                    self.voxel.color = Voxel.flame_color
+                else:
+                    self.voxel.color = Voxel.fire_color
+            else:
+                self.voxel.color = color.color(*self.material_properties.color)
 
     def add_neighbor(self, neighbor):
         self.neighbors.append(neighbor)
 
     def calc_next_state(self, time_s):
-        heat = 0
+        self.next_state.is_burning = self.state.temperature >= self.material_properties.autoignition_temp
 
+        self.calculate_conduction(time_s)
+
+    def calculate_conduction(self, time_s):
+        heat = 0
         for neighbor in self.neighbors:
             if neighbor is not None:
                 R1 = BLOCK_SIZE_M / 2 / self.material_properties.conductivity
@@ -54,7 +75,7 @@ class Cell(Entity):
                 R = R1 + R2
                 U = 1 / R
                 q = U * BLOCK_SIZE_M * BLOCK_SIZE_M * (neighbor.state.temperature - self.state.temperature)
-                heat += q*1000*1000
+                heat += q * 1e6
         heat *= time_s
         self.next_state.temperature += heat / (
                 self.material_properties.specific_heat * self.material_properties.density)

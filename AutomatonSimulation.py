@@ -6,7 +6,11 @@ from BlocksEnvironment import BlocksEnvironment
 class AutomatonSimulation:
     def __init__(self, block_environment: BlocksEnvironment):
         self.block_environment = block_environment
-        self.s_for_every_step = 2
+        self.s_for_every_step = 10
+        self.block_environment.cells[0][0][0].state.temperature = 1200
+        self.block_environment.cells[0][0][0].next_state.temperature = 1200
+        self.block_environment.cells[0][0][3].state.temperature = 1200
+        self.block_environment.cells[0][0][3].next_state.temperature = 1200
         self.block_environment.cells[5][0][5].state.temperature = 1700
         self.block_environment.cells[5][0][5].next_state.temperature = 1700
         for x in range(self.block_environment.size[0]):
@@ -33,6 +37,7 @@ class AutomatonSimulation:
                     if self.block_environment.cells[x][y][z] is not None:
                         self.block_environment.cells[x][y][z].calc_next_state(self.s_for_every_step)
         print()
+
         for x in range(self.block_environment.size[0]):
             for y in range(self.block_environment.size[1]):
                 for z in range(self.block_environment.size[2]):

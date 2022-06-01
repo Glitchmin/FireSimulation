@@ -28,12 +28,12 @@ if __name__ == "__main__":
     # def update():
 
     b = Button(text='view \nmode', color=color.azure, scale=.1, text_origin=(-.5, 0),
-               position=window.bottom_left + (0.1, 0.1))
+               position=window.bottom_left + (0.07, 0.07))
     b.on_click = env.switch_view_mode
     b.tooltip = Tooltip('toggle thermal')
 
-    sim_button = Button(text='start \nsimulation', color=color.azure, scale=.1, text_origin=(-.5, 0),
-                        position=window.bottom_left + (1.1, 0.1))
+    sim_button = Button(text='start \nsimulation', color=color.azure, scale=(0.18, 0.1), text_origin=(-.5, 0),
+                        position=window.bottom_left + (0.3, 0.07))
     sim_button.on_click = start_sim
     sim_tooltip = Tooltip('start the simulation')
     sim_button.tooltip = sim_tooltip
