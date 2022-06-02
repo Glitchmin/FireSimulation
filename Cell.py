@@ -71,14 +71,32 @@ class Cell(Entity):
         self.calculate_smoke(time_s)
 
     def calculate_smoke(self, time_s):
+        is_ceiling_above = True
         for neighbor in self.neighbors:
-            if self.material_properties.id != 0 and neighbor.position[1] > self.position[1] and \
-                    neighbor.material_properties.id == 0 and self.state.is_burning:
-                neighbor.next_state.smoke_saturation += self.material_properties.smoke_generation_s * time_s
-            if self.material_properties.id == 0 and neighbor.position[1] > self.position[1] and \
-                    neighbor.material_properties.id == 0:
-                neighbor.next_state.smoke_saturation += self.state.smoke_saturation
-                self.next_state.smoke_saturation -= self.state.smoke_saturation
+            if neighbor is not None and neighbor.position[1] > self.position[1]\
+                    and neighbor.material_properties.id == 0:
+                is_ceiling_above = False
+
+        for neighbor in self.neighbors:
+            if neighbor is not None:
+                if self.material_properties.id != 0 and neighbor.position[1] > self.position[1] and \
+                        neighbor.material_properties.id == 0 and self.state.is_burning:
+                    neighbor.next_state.smoke_saturation += self.material_properties.smoke_generation_s * time_s
+                if self.material_properties.id == 0 and neighbor.position[1] > self.position[1] and \
+                        neighbor.material_properties.id == 0:
+                    if neighbor.state.smoke_saturation >= 1.0:
+                        self.next_state.smoke_saturation += neighbor.state.smoke_saturation - 1.0
+                        neighbor.next_state.smoke_saturation = 1.0
+                    else:
+                        neighbor.next_state.smoke_saturation += self.state.smoke_saturation
+                        self.next_state.smoke_saturation -= self.state.smoke_saturation
+                        self.next_state.smoke_saturation = max(0.0, self.next_state.smoke_saturation)
+                    neighbor.next_state.smoke_saturation += self.state.smoke_saturation
+                    self.next_state.smoke_saturation -= self.state.smoke_saturation
+                if self.material_properties.id == 0 and is_ceiling_above and neighbor.position[1] == self.position[1]:
+                    neighbor.next_state.smoke_saturation += self.state.smoke_saturation / 8
+                    self.next_state.smoke_saturation -= self.state.smoke_saturation / 8
+
 
     def calculate_conduction(self, time_s):
         heat = 0
