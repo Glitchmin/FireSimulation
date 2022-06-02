@@ -91,8 +91,6 @@ class Cell(Entity):
                         neighbor.next_state.smoke_saturation += self.state.smoke_saturation
                         self.next_state.smoke_saturation -= self.state.smoke_saturation
                         self.next_state.smoke_saturation = max(0.0, self.next_state.smoke_saturation)
-                    neighbor.next_state.smoke_saturation += self.state.smoke_saturation
-                    self.next_state.smoke_saturation -= self.state.smoke_saturation
                 if self.material_properties.id == 0 and is_ceiling_above and neighbor.position[1] == self.position[1]:
                     neighbor.next_state.smoke_saturation += self.state.smoke_saturation / 8
                     self.next_state.smoke_saturation -= self.state.smoke_saturation / 8
