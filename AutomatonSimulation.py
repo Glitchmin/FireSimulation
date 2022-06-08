@@ -45,10 +45,10 @@ class AutomatonSimulation(threading.Thread):
                         if self.block_environment.cells[x][y][z] is not None:
                             self.block_environment.cells[x][y][z].calc_next_state(self.s_for_every_step)
 
-            print(self.block_environment.cells[0][0][0].state.temperature)
-            print(self.block_environment.cells[0][0][1].next_temps)
-            print(self.block_environment.cells[1][0][0].next_temps)
-            print(self.block_environment.cells[0][0][0].next_temps)
+            # print(self.block_environment.cells[0][0][0].state.temperature)
+            # print(self.block_environment.cells[0][0][1].next_temps)
+            # print(self.block_environment.cells[1][0][0].next_temps)
+            # print(self.block_environment.cells[0][0][0].next_temps)
             for x in range(self.block_environment.size[0]):
                 for y in range(self.block_environment.size[1]):
                     for z in range(self.block_environment.size[2]):
@@ -61,4 +61,4 @@ class AutomatonSimulation(threading.Thread):
 
     def run(self):
         while True:
-            self.next_step(10)
+            self.next_step(5)

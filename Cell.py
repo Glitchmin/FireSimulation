@@ -2,7 +2,7 @@ from ursina import *
 from MaterialProperties import MaterialProperties
 from StateProperties import StateProperties
 from ColorToTemperature import ColorToTemperature
-from constants import BLOCK_SIZE_M
+from constants import BLOCK_SIZE_M, CONVECTION_VERTICAL_RATIO, CONVECTION_HORIZONTAL_RATIO, ROOM_TEMPERATURE
 
 
 class Voxel(Button):
@@ -69,6 +69,7 @@ class Cell(Entity):
         self.next_state.is_burning = self.state.temperature >= self.material_properties.autoignition_temp
 
         self.calculate_conduction(time_s)
+        self.calculate_convection(time_s)
         self.calculate_smoke(time_s)
 
     def calculate_smoke(self, time_s):
@@ -124,7 +125,24 @@ class Cell(Entity):
                     print("WRONG TEMP CONDUCTION DIRECTION")
                     print()
                 self.next_temps[num] += heat / (self.material_properties.specific_heat *
-                                                self.material_properties.density*BLOCK_SIZE_M**3)
+                                                self.material_properties.density * BLOCK_SIZE_M ** 3)
 
+    def calculate_convection(self, time_s):
+        if not self.material_properties.is_gas():
+            return
 
-        # print(self.next_state.temperature)
+        for neighbor in self.neighbors:
+            num = self.get_neigh_num(neighbor)
+            if neighbor is not None and neighbor.material_properties.is_gas():
+                ratio = 0
+                if self.position.y < neighbor.position.y:
+                    ratio = CONVECTION_VERTICAL_RATIO
+                if self.position.y == neighbor.position.y:
+                    ratio = CONVECTION_HORIZONTAL_RATIO
+
+                q = ratio * BLOCK_SIZE_M * BLOCK_SIZE_M * (self.state.temperature - neighbor.state.temperature)
+                heat = q * time_s
+                neighbor.next_temps[num] += heat / (neighbor.material_properties.specific_heat *
+                                                    neighbor.material_properties.density * BLOCK_SIZE_M ** 3)
+                self.next_temps[num] -= heat / (self.material_properties.specific_heat *
+                                                self.material_properties.density * BLOCK_SIZE_M ** 3)
