@@ -55,7 +55,7 @@ class Cell(Entity):
                     self.voxel.color = Voxel.fire_color
             elif not self.material_properties.is_invisible():
                 self.voxel.color = color.color(*self.material_properties.color)
-            elif self.state.smoke_saturation > 0:
+            elif self.state.smoke_saturation > 0.005:
                 if self.voxel is None:
                     self.voxel = Voxel(self.position, self.material_properties.color)
 
@@ -77,6 +77,7 @@ class Cell(Entity):
                     and neighbor.material_properties.id == 0:
                 is_ceiling_above = False
 
+        intermediate_smoke = self.state.smoke_saturation
         for neighbor in self.neighbors:
             if neighbor is not None:
                 if self.material_properties.id != 0 and neighbor.position[1] > self.position[1] and \
@@ -85,15 +86,25 @@ class Cell(Entity):
                 if self.material_properties.id == 0 and neighbor.position[1] > self.position[1] and \
                         neighbor.material_properties.id == 0:
                     if neighbor.state.smoke_saturation >= 1.0:
-                        self.next_state.smoke_saturation += neighbor.state.smoke_saturation - 1.0
+                        intermediate_smoke += neighbor.state.smoke_saturation - 1.0
                         neighbor.next_state.smoke_saturation = 1.0
-                    else:
-                        neighbor.next_state.smoke_saturation += self.state.smoke_saturation
-                        self.next_state.smoke_saturation -= self.state.smoke_saturation
-                        self.next_state.smoke_saturation = max(0.0, self.next_state.smoke_saturation)
-                if self.material_properties.id == 0 and is_ceiling_above and neighbor.position[1] == self.position[1]:
-                    neighbor.next_state.smoke_saturation += self.state.smoke_saturation / 8
-                    self.next_state.smoke_saturation -= self.state.smoke_saturation / 8
+                    elif self.state.smoke_saturation != 0:
+                        neighbor.next_state.smoke_saturation += 0.8 * self.state.smoke_saturation
+                        intermediate_smoke -= 0.8 * self.state.smoke_saturation
+                        intermediate_smoke = max(0.0, intermediate_smoke)
+        pre_neighbour_split_smoke = intermediate_smoke
+        divider = 50
+        if self.material_properties.id == 0 and is_ceiling_above:
+            divider = 6
+        for neighbor in self.neighbors:
+            if neighbor is not None:
+                if neighbor.position[1] == self.position[1]:
+                    neighbor.next_state.smoke_saturation += pre_neighbour_split_smoke / divider
+                    intermediate_smoke -= pre_neighbour_split_smoke / divider
+
+        self.next_state.smoke_saturation += (intermediate_smoke - self.state.smoke_saturation)
+        # if intermediate_smoke != 0:
+        #     print(f"state {self.state.smoke_saturation}, inter: {intermediate_smoke}, next {self.next_state.smoke_saturation}")
 
 
     def calculate_conduction(self, time_s):

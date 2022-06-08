@@ -88,7 +88,8 @@ class BlocksEnvironment(Entity):
                 hit_info = raycast(camera.world_position, mouse.world_point - camera.world_position, distance=inf)
                 if hit_info.hit:
                     position = hit_info.entity.position
-                    print(self.cell_at(position).state.temperature)
+                    print('T:', self.cell_at(position).state.temperature)
+                    print('smoke:', self.cell_at(position).state.smoke_saturation)
                     # self.remove_cell(position)
 
         if key == 's' and held_keys['left control']:

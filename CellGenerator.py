@@ -16,7 +16,7 @@ class CellGenerator:
                                   conductivity=0.025,
                                   autoignition_temp=inf, smoke_generation_s=0.0),
             1: MaterialProperties(1, "wood", color=(100, 0.3, 0.9), specific_heat=2400, density=500, conductivity=0.2,
-                                  autoignition_temp=273+250,smoke_generation_s=1/60),
+                                  autoignition_temp=273+250,smoke_generation_s=1/25),
             # 2: MaterialProperties(2, "name_2", 1000, (200, 0.5, 0.9)),
             # 3: MaterialProperties(3, "name_3", 1000, (0, 0.0, 0.5, 0.5)),
             # 4: MaterialProperties(4, "name_4", 1000, (0, 0.7, 0.9, 0.8))
