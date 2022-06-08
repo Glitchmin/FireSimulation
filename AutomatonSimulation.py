@@ -1,6 +1,7 @@
 from copy import copy
 
 from BlocksEnvironment import BlocksEnvironment
+from Cell import Cell
 
 
 class AutomatonSimulation:
@@ -31,15 +32,23 @@ class AutomatonSimulation:
             for y in range(self.block_environment.size[1]):
                 for z in range(self.block_environment.size[2]):
                     if self.block_environment.cells[x][y][z] is not None:
-                        self.block_environment.cells[x][y][z].calc_next_state(self.s_for_every_step)
-        print()
-
-        print(self.block_environment.cells[0][1][0].state.temperature)
-        print(self.block_environment.cells[0][1][0].next_state.temperature)
-
+                        cell: Cell = self.block_environment.cells[x][y][z]
+                        cell.next_temps = [cell.state.temperature] * 6
         for x in range(self.block_environment.size[0]):
             for y in range(self.block_environment.size[1]):
                 for z in range(self.block_environment.size[2]):
                     if self.block_environment.cells[x][y][z] is not None:
-                        self.block_environment.cells[x][y][z].state = copy(self.block_environment.cells[x][y][z].next_state)
+                        self.block_environment.cells[x][y][z].calc_next_state(self.s_for_every_step)
+
+        print(self.block_environment.cells[0][0][0].state.temperature)
+        print(self.block_environment.cells[0][0][1].next_temps)
+        print(self.block_environment.cells[1][0][0].next_temps)
+        print(self.block_environment.cells[0][0][0].next_temps)
+        for x in range(self.block_environment.size[0]):
+            for y in range(self.block_environment.size[1]):
+                for z in range(self.block_environment.size[2]):
+                    if self.block_environment.cells[x][y][z] is not None:
+                        cell: Cell = self.block_environment.cells[x][y][z]
+                        cell.state = copy(cell.next_state)
+                        cell.state.temperature = sum(cell.next_temps) / 6
         self.block_environment.refresh_voxels()

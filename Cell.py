@@ -28,6 +28,7 @@ class Cell(Entity):
         self.material_properties = material_properties
         self.state = state
         self.next_state = copy(state)
+        self.next_temps = [state.temperature] * 6
         self.neighbors: [Cell] = []
         self.voxel = None
         self.position = position
@@ -73,7 +74,7 @@ class Cell(Entity):
     def calculate_smoke(self, time_s):
         is_ceiling_above = True
         for neighbor in self.neighbors:
-            if neighbor is not None and neighbor.position[1] > self.position[1]\
+            if neighbor is not None and neighbor.position[1] > self.position[1] \
                     and neighbor.material_properties.id == 0:
                 is_ceiling_above = False
 
@@ -95,18 +96,31 @@ class Cell(Entity):
                     neighbor.next_state.smoke_saturation += self.state.smoke_saturation / 8
                     self.next_state.smoke_saturation -= self.state.smoke_saturation / 8
 
+    def get_neigh_num(self, neighbor):
+        if self.position.x - neighbor.position.x > 0:
+            return 0
+        if self.position.x - neighbor.position.x < 0:
+            return 1
+        if self.position.y - neighbor.position.y > 0:
+            return 2
+        if self.position.y - neighbor.position.y < 0:
+            return 3
+        if self.position.z - neighbor.position.z > 0:
+            return 4
+        if self.position.z - neighbor.position.z < 0:
+            return 5
 
     def calculate_conduction(self, time_s):
-        heat = 0
         for neighbor in self.neighbors:
+            num = self.get_neigh_num(neighbor)
             if neighbor is not None:
                 R1 = BLOCK_SIZE_M / 2 / self.material_properties.conductivity
                 R2 = BLOCK_SIZE_M / 2 / neighbor.material_properties.conductivity
                 R = R1 + R2
                 U = 1 / R
-                q = U * BLOCK_SIZE_M * BLOCK_SIZE_M * (neighbor.state.temperature - self.state.temperature)
-                heat += q
-        heat *= time_s
-        self.next_state.temperature += heat / (
-                self.material_properties.specific_heat * self.material_properties.density)
+                q = U * BLOCK_SIZE_M * BLOCK_SIZE_M / 6 * (neighbor.state.temperature - self.state.temperature)
+                heat = q * time_s
+                self.next_temps[num] += heat / (self.material_properties.specific_heat *
+                                                self.material_properties.density*BLOCK_SIZE_M**3)
+
         # print(self.next_state.temperature)
