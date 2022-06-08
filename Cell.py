@@ -46,6 +46,13 @@ class Cell(Entity):
         if thermal_mode:
             if not self.material_properties.is_invisible():
                 self.voxel.color = color.rgb(*ColorToTemperature().convert_K_to_RGB(self.state.temperature))
+            elif abs(self.state.temperature - ROOM_TEMPERATURE) > 20:
+                if self.voxel is None:
+                    self.voxel = Voxel(self.position, color.color(1,1,1,1))
+                self.voxel.color = color.rgba(*ColorToTemperature().convert_K_to_RGB(self.state.temperature), 255*0.5)
+            else:
+                if self.voxel is not None:
+                    destroy(self.voxel)
         else:
             if self.state.is_burning:
                 if self.voxel is None:
@@ -61,6 +68,8 @@ class Cell(Entity):
                     self.voxel = Voxel(self.position, self.material_properties.color)
 
                 self.voxel.color = color.color(0, 0, 0.5, self.state.smoke_saturation)
+            elif self.voxel is not None:
+                destroy(self.voxel)
 
     def add_neighbor(self, neighbor):
         self.neighbors.append(neighbor)
