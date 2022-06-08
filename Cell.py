@@ -120,7 +120,11 @@ class Cell(Entity):
                 U = 1 / R
                 q = U * BLOCK_SIZE_M * BLOCK_SIZE_M / 6 * (neighbor.state.temperature - self.state.temperature)
                 heat = q * time_s
+                if self.state.temperature > neighbor.state.temperature and heat > 0:
+                    print("WRONG TEMP CONDUCTION DIRECTION")
+                    print()
                 self.next_temps[num] += heat / (self.material_properties.specific_heat *
                                                 self.material_properties.density*BLOCK_SIZE_M**3)
+
 
         # print(self.next_state.temperature)
