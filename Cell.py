@@ -32,6 +32,7 @@ class Cell(Entity):
         self.neighbors: [Cell] = []
         self.voxel = None
         self.position = position
+        self.radiation_neighbors = []
         if not self.material_properties.is_invisible():
             self.voxel = Voxel(position, material_properties.color)
 
