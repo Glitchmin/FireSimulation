@@ -25,6 +25,16 @@ class BlocksEnvironment(Entity):
             for x in range(x_size):
                 self.create_cell((x, 0, z))
 
+        for z in range(z_size):
+            for y in range(1, y_size):
+                self.create_cell((0, y, z), material_id=3)
+                self.create_cell((x_size - 1, y, z), material_id=3)
+
+        for x in range(x_size):
+            for y in range(1, y_size):
+                # self.create_cell((x, y, 0), material_id=3)
+                self.create_cell((x, y, z_size-1), material_id=3)
+
     def cell_at(self, position) -> Cell:
         position = [int(a) for a in position]
         return self.cells[position[0]][position[1]][position[2]]
