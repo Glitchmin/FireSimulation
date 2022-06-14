@@ -72,15 +72,18 @@ class AutomatonSimulation(threading.Thread):
                 for y in range(self.block_environment.size[1]):
                     for z in range(self.block_environment.size[2]):
                         self.block_environment.cells[x][y][z].radiation_neighors = \
-                        list(set(self.block_environment.cells[x][y][z].radiation_neighbors))
+                            list(set(self.block_environment.cells[x][y][z].radiation_neighbors))
                         print("(", x, y, z, ")", list(set(self.block_environment.cells[x][y][z].radiation_neighbors)))
+
+            for x in range(self.block_environment.size[0]):
+                for y in range(self.block_environment.size[1]):
+                    for z in range(self.block_environment.size[2]):
                         tmp_list = []
                         for pos in self.block_environment.cells[x][y][z].radiation_neighors:
-                            tmp_list.append(self.block_environment.cells[pos[0]][pos[1]][pos[2]])
+                            tmp_list.append(self.block_environment.cells[int(pos[0])][int(pos[1])][int(pos[2])])
                         self.block_environment.cells[x][y][z].radiation_neighors = tmp_list
+                        print("list", tmp_list)
             sys.stdout = original_stdout
-
-
 
     def dispatch_ray(self, cell, cell2):
         hit_info = raycast(cell.position, cell2.position - cell.position, distance=5)
