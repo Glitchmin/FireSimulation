@@ -10,7 +10,7 @@ class ColorToTemperature:
 
     def convert_K_to_RGB(self, colour_temperature):
         x = colour_temperature / (self.max - self.min)
-
+        x = max(0, x)
         r = round(255 * math.sqrt(x))
         g = round(255 * math.pow(x, 3))
         if math.sin(2 * math.pi * x) >= 0:

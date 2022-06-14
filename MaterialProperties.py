@@ -17,4 +17,7 @@ class MaterialProperties:
         return len(self.color) >= 4 and self.color[3] < 1
 
     def is_invisible(self):
-        return len(self.color) >= 4 and self.color[3] == 0
+        return len(self.color) >= 4 and self.color[3] < 0.1
+
+    def is_gas(self):
+        return self.id == 0
