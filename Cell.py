@@ -81,6 +81,7 @@ class Cell(Entity):
 
         self.calculate_conduction(time_s)
         self.calculate_convection(time_s)
+        self.calculate_radiation(time_s)
         self.calculate_smoke(time_s)
 
     def calculate_smoke(self, time_s):
