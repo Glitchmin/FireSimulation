@@ -70,7 +70,7 @@ class Cell(Entity):
                 if self.state.smoke_saturation < 0:
                     self.voxel.color = color.color(200, 1, 1)
                 elif self.state.smoke_saturation > 1:
-                    self.voxel.color = color.color(100, 1, 1)
+                    self.voxel.color = color.color(0, 0, 0.6)
                 else:
                     self.voxel.color = color.color(0, 0, 0.5, self.state.smoke_saturation)
             elif self.voxel is not None:
@@ -87,40 +87,88 @@ class Cell(Entity):
         self.calculate_smoke(time_s)
 
     def calculate_smoke(self, time_s):
+        if not self.material_properties.is_gas():
+            if self.state.is_burning:
+                print("is burning", self.position)
+                for neighbor in self.neighbors:
+                    if neighbor is not None and neighbor.material_properties.is_gas() and\
+                            neighbor.position[1] > self.position[1]:
+                        print("and is heating", self.position, self.material_properties.smoke_generation_s * time_s)
+                        neighbor.next_state.smoke_saturation += self.material_properties.smoke_generation_s * time_s
+            return
+
         is_ceiling_above = True
         for neighbor in self.neighbors:
+            # if self.position == (0, 2, 0) and neighbor is not None:
+            if neighbor is not None and neighbor.position[1] > self.position[1] \
+                    and not neighbor.material_properties.is_gas():
+                print(">>>", neighbor.material_properties.is_gas(), neighbor.material_properties.id, self.position, "neigh: ", neighbor.position)
+
             if neighbor is not None and neighbor.position[1] > self.position[1] \
                     and neighbor.material_properties.is_gas():
                 is_ceiling_above = False
 
         intermediate_smoke = self.state.smoke_saturation
-        for neighbor in self.neighbors:
-            if neighbor is not None and neighbor.material_properties.is_gas():
-                if not self.material_properties.is_gas() and neighbor.position[1] > self.position[1]\
-                        and self.state.is_burning:
-                    neighbor.next_state.smoke_saturation += self.material_properties.smoke_generation_s * time_s
-                if self.material_properties.is_gas():
-                    if neighbor.position[1] > self.position[1]:
-                        if self.state.smoke_saturation != 0 and neighbor.state.smoke_saturation < 1:
-                            neighbor.next_state.smoke_saturation += 0.8 * intermediate_smoke
-                            intermediate_smoke -= 0.8 * intermediate_smoke
-                    elif neighbor.position[1] < self.position[1]:
-                        if intermediate_smoke >= 1.0:
-                            neighbor.next_state.smoke_saturation += (intermediate_smoke - 1.0)/2
-                            intermediate_smoke -= (intermediate_smoke - 1.0)/2
-        pre_neighbour_split_smoke = intermediate_smoke
-        divider = 50
-        if self.material_properties.is_gas() and is_ceiling_above:
-            divider = 6
+
+        equal_y_neighbors = 0
+        neighbor_smoke_space = 0.
+        neighbor_down_space = 0.
+        neighbor_up_space = 0.
+
         for neighbor in self.neighbors:
             if neighbor is not None:
                 if neighbor.position[1] == self.position[1]:
-                    neighbor.next_state.smoke_saturation += pre_neighbour_split_smoke / divider
-                    intermediate_smoke -= pre_neighbour_split_smoke / divider
+                    equal_y_neighbors += 1
+                    neighbor_smoke_space += max(0., 1.-neighbor.state.smoke_saturation)
+                elif neighbor.position[1] < self.position[1]:
+                    neighbor_down_space = max(0., 1.-neighbor.state.smoke_saturation)
+                elif neighbor.position[1] > self.position[1]:
+                    neighbor_up_space = max(0., 1.-neighbor.state.smoke_saturation)
+
+        for neighbor in self.neighbors:
+            if neighbor.position[1] > self.position[1]:
+                if self.state.smoke_saturation != 0 and neighbor.state.smoke_saturation < 1:
+                    smoke_up = 0.8 * intermediate_smoke
+                    neighbor.next_state.smoke_saturation += smoke_up
+                    intermediate_smoke -= smoke_up
+            elif neighbor.position[1] < self.position[1]:
+                if intermediate_smoke >= 1.0:
+                    initial_down_smoke = min(neighbor_down_space, (intermediate_smoke - 1.0)*3/4)
+                    # propagated_sideways_smoke = min(neighbor_smoke_space, initial_down_smoke)
+                    # propagated_down_smoke = intermediate_smoke-1. - propagated_sideways_smoke
+                    # propagated_down_smoke = (intermediate_smoke - 1.0)/2
+                    propagated_down_smoke = initial_down_smoke
+                    neighbor.next_state.smoke_saturation += propagated_down_smoke
+                    intermediate_smoke -= propagated_down_smoke
+
+        # pre_neighbor_split_smoke = max(0., intermediate_smoke-1.)
+        # intermediate_smoke = self.divide_to_neigbours(equal_y_neighbors, intermediate_smoke, pre_neighbor_split_smoke)
+
+        pre_neighbor_split_smoke = intermediate_smoke
+        divider = 50
+        if intermediate_smoke > 0.3:
+            divider = 14
+        if is_ceiling_above or neighbor_up_space < 0.1:
+            # print("is_ceiling_above or neighbor_up_space < 0.1", self.position)
+            # divider = 6*equal_y_neighbors/4
+            divider = 6
+        # if not is_ceiling_above and neighbor_up_space < 0.9:
+        #     divider = 6/(1-neighbor_up_space)
+        if pre_neighbor_split_smoke > 1 and pre_neighbor_split_smoke/divider*equal_y_neighbors > 0.9:
+            print("side propagated over excess smoke:", pre_neighbor_split_smoke, pre_neighbor_split_smoke/divider*equal_y_neighbors)
+        intermediate_smoke = self.divide_to_neighbors(divider, intermediate_smoke, pre_neighbor_split_smoke)
 
         self.next_state.smoke_saturation += (intermediate_smoke - self.state.smoke_saturation)
         # if intermediate_smoke != 0:
         #     print(f"state {self.state.smoke_saturation}, inter: {intermediate_smoke}, next {self.next_state.smoke_saturation}")
+
+    def divide_to_neighbors(self, divider, intermediate_smoke, pre_neighbor_split_smoke):
+        for neighbor in self.neighbors:
+            if neighbor is not None:
+                if neighbor.position[1] == self.position[1]:
+                    neighbor.next_state.smoke_saturation += pre_neighbor_split_smoke / divider
+                    intermediate_smoke -= pre_neighbor_split_smoke / divider
+        return intermediate_smoke
 
     def get_neigh_num(self, neighbor):
         if self.position.x - neighbor.position.x > 0:

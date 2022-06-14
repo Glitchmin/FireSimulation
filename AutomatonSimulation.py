@@ -12,6 +12,10 @@ class AutomatonSimulation(threading.Thread):
         self.s_for_every_step = 1
         self.block_environment.cells[0][0][0].state.temperature = 1200
         self.block_environment.cells[0][0][0].next_state.temperature = 1200
+        self.block_environment.cells[14][0][14].state.temperature = 1200
+        self.block_environment.cells[14][0][14].next_state.temperature = 1200
+
+    def create_neighbors_lists(self):
         for x in range(self.block_environment.size[0]):
             for y in range(self.block_environment.size[1]):
                 for z in range(self.block_environment.size[2]):
@@ -28,6 +32,7 @@ class AutomatonSimulation(threading.Thread):
                             if 0 <= z + k < self.block_environment.size[2]:
                                 self.block_environment.cells[x][y][z].add_neighbor(
                                     self.block_environment.cells[x][y][z + k])
+
     def next_10(self):
         self.next_step(100)
 
@@ -50,6 +55,7 @@ class AutomatonSimulation(threading.Thread):
             # print(self.block_environment.cells[1][0][0].next_temps)
             # print(self.block_environment.cells[0][0][0].next_temps)
             smoke_sum = 0
+            next_smoke_sum = 0
             prev_smoke_sum = 0
             for x in range(self.block_environment.size[0]):
                 for y in range(self.block_environment.size[1]):
@@ -57,13 +63,15 @@ class AutomatonSimulation(threading.Thread):
                         if self.block_environment.cells[x][y][z] is not None:
                             cell: Cell = self.block_environment.cells[x][y][z]
                             prev_smoke_sum += cell.state.smoke_saturation
+                            next_smoke_sum += cell.next_state.smoke_saturation
                             cell.state = copy(cell.next_state)
                             cell.state.temperature = sum(cell.next_temps) / 6
                             smoke_sum += cell.state.smoke_saturation
 
-            print(f"smoke sum: {smoke_sum}, diff: {smoke_sum-prev_smoke_sum}")
+            print(f"smoke sum: {smoke_sum}, next: {next_smoke_sum}, diff: {smoke_sum-prev_smoke_sum}")
         self.block_environment.refresh_voxels()
 
     def run(self):
+        self.create_neighbors_lists()
         while True:
             self.next_step(5)
