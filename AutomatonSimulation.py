@@ -42,7 +42,7 @@ class AutomatonSimulation(threading.Thread):
                     if cell.voxel is not None:
                         cell.voxel.collider = None
                     if not cell.material_properties.is_gas():
-                        print(x, y, z)
+                        print(cell, x, y, z)
                         for x2 in [0, self.block_environment.size[0] - 1]:
                             for y2 in range(max(0, y - 5), min(self.block_environment.size[1], y + 5)):
                                 for z2 in range(max(0, z - 5), min(self.block_environment.size[2], z + 5)):
@@ -71,19 +71,24 @@ class AutomatonSimulation(threading.Thread):
             for x in range(self.block_environment.size[0]):
                 for y in range(self.block_environment.size[1]):
                     for z in range(self.block_environment.size[2]):
-                        self.block_environment.cells[x][y][z].radiation_neighors = \
+                        self.block_environment.cells[x][y][z].radiation_neighbors = \
                             list(set(self.block_environment.cells[x][y][z].radiation_neighbors))
                         print("(", x, y, z, ")", list(set(self.block_environment.cells[x][y][z].radiation_neighbors)))
 
-            for x in range(self.block_environment.size[0]):
-                for y in range(self.block_environment.size[1]):
-                    for z in range(self.block_environment.size[2]):
-                        tmp_list = []
-                        for pos in self.block_environment.cells[x][y][z].radiation_neighors:
-                            tmp_list.append(self.block_environment.cells[int(pos[0])][int(pos[1])][int(pos[2])])
-                        self.block_environment.cells[x][y][z].radiation_neighors = tmp_list
-                        print("list", tmp_list)
-            sys.stdout = original_stdout
+        sys.stdout = original_stdout
+        for x in range(self.block_environment.size[0]):
+            for y in range(self.block_environment.size[1]):
+                for z in range(self.block_environment.size[2]):
+                    tmp_list: [Cell] = []
+                    for pos in self.block_environment.cells[x][y][z].radiation_neighbors:
+                        print(pos)
+                        tmp_list.append(self.block_environment.cells[int(pos[0])][int(pos[1])][int(pos[2])])
+                    self.block_environment.cells[x][y][z].radiation_neighbors = tmp_list
+                    print("list", tmp_list)
+        for x in range(self.block_environment.size[0]):
+            for y in range(self.block_environment.size[1]):
+                for z in range(self.block_environment.size[2]):
+                    print(self.block_environment.cells[x][y][z].radiation_neighbors)
 
     def dispatch_ray(self, cell, cell2):
         hit_info = raycast(cell.position, cell2.position - cell.position, distance=5)
