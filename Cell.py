@@ -54,6 +54,7 @@ class Cell(Entity):
                 if self.voxel is not None:
                     destroy(self.voxel)
         else:
+            smoke_saturation = min(max(0., self.state.smoke_saturation), 1.)
             if self.state.is_burning:
                 if self.voxel is None:
                     self.voxel = Voxel(self.position, self.material_properties.color)
@@ -63,11 +64,15 @@ class Cell(Entity):
                     self.voxel.color = Voxel.fire_color
             elif not self.material_properties.is_invisible():
                 self.voxel.color = color.color(*self.material_properties.color)
-            elif self.state.smoke_saturation > 0.005:
+            elif smoke_saturation > 0.005 or self.state.smoke_saturation < 0:
                 if self.voxel is None:
                     self.voxel = Voxel(self.position, self.material_properties.color)
-
-                self.voxel.color = color.color(0, 0, 0.5, self.state.smoke_saturation)
+                if self.state.smoke_saturation < 0:
+                    self.voxel.color = color.color(200, 1, 1)
+                elif self.state.smoke_saturation > 1:
+                    self.voxel.color = color.color(100, 1, 1)
+                else:
+                    self.voxel.color = color.color(0, 0, 0.5, self.state.smoke_saturation)
             elif self.voxel is not None:
                 destroy(self.voxel)
 

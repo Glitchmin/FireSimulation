@@ -49,14 +49,19 @@ class AutomatonSimulation(threading.Thread):
             # print(self.block_environment.cells[0][0][1].next_temps)
             # print(self.block_environment.cells[1][0][0].next_temps)
             # print(self.block_environment.cells[0][0][0].next_temps)
+            smoke_sum = 0
+            prev_smoke_sum = 0
             for x in range(self.block_environment.size[0]):
                 for y in range(self.block_environment.size[1]):
                     for z in range(self.block_environment.size[2]):
                         if self.block_environment.cells[x][y][z] is not None:
                             cell: Cell = self.block_environment.cells[x][y][z]
+                            prev_smoke_sum += cell.state.smoke_saturation
                             cell.state = copy(cell.next_state)
                             cell.state.temperature = sum(cell.next_temps) / 6
+                            smoke_sum += cell.state.smoke_saturation
 
+            print(f"smoke sum: {smoke_sum}, diff: {smoke_sum-prev_smoke_sum}")
         self.block_environment.refresh_voxels()
 
     def run(self):
