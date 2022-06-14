@@ -179,10 +179,3 @@ class Cell(Entity):
         q = RADIATION_CONSTANT * self.material_properties.emissivity * pow(BLOCK_SIZE_M, 2) \
             * pow(self.state.temperature, 4)
         heat = q * time_s
-        for i in range(6):
-            self.next_temps[i] -= heat / 6
-
-        neighbors_no = len(self.radiation_neighbors)
-        for neighbor in self.radiation_neighbors:
-            for i in range(6):
-                neighbor.next_temps[i] += heat / (6 * neighbors_no)
