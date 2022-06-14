@@ -36,5 +36,4 @@ class CellGenerator:
         if material_id is None:
             material_id = self.building_material_id
 
-        # return Cell(position, self.material_defs[material_id], StateProperties(temperature=273+position[0]*30+position[2]*100))
         return Cell(position, self.material_defs[material_id], StateProperties())

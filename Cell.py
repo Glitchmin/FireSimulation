@@ -2,7 +2,8 @@ from ursina import *
 from MaterialProperties import MaterialProperties
 from StateProperties import StateProperties
 from ColorToTemperature import ColorToTemperature
-from constants import BLOCK_SIZE_M, CONVECTION_VERTICAL_RATIO, CONVECTION_HORIZONTAL_RATIO, ROOM_TEMPERATURE, RADIATION_CONSTANT
+from constants import BLOCK_SIZE_M, CONVECTION_VERTICAL_RATIO, CONVECTION_HORIZONTAL_RATIO, ROOM_TEMPERATURE, \
+    RADIATION_CONSTANT
 
 
 class Voxel(Button):
@@ -24,6 +25,7 @@ class Voxel(Button):
 
 class Cell(Entity):
     radiation_sum = 0
+    rad_walls_sum = 0
 
     def __init__(self, position, material_properties: MaterialProperties, state: StateProperties, **kwargs):
         super().__init__(**kwargs)
@@ -51,8 +53,8 @@ class Cell(Entity):
                 self.voxel.color = color.rgb(*ColorToTemperature().convert_K_to_RGB(self.state.temperature))
             elif abs(self.state.temperature - ROOM_TEMPERATURE) > 20:
                 if self.voxel is None:
-                    self.voxel = Voxel(self.position, color.color(1,1,1,1))
-                self.voxel.color = color.rgba(*ColorToTemperature().convert_K_to_RGB(self.state.temperature), 255*0.5)
+                    self.voxel = Voxel(self.position, color.color(1, 1, 1, 1))
+                self.voxel.color = color.rgba(*ColorToTemperature().convert_K_to_RGB(self.state.temperature), 255 * 0.5)
             else:
                 if self.voxel is not None:
                     destroy(self.voxel)
@@ -83,12 +85,18 @@ class Cell(Entity):
         self.neighbors.append(neighbor)
 
     def calc_rad_fact(self):
+        if self.material_properties.is_gas():
+            return
+
         for neighbor in self.neighbors:
             self.radiation_factor += neighbor.material_properties.is_gas()
+            Cell.rad_walls_sum += 1
+
 
     def calc_next_state(self, time_s):
         self.next_state.is_burning = self.state.temperature >= self.material_properties.autoignition_temp
 
+        self.calculate_radiation()
         self.calculate_conduction(time_s)
         self.calculate_convection(time_s)
         self.calculate_smoke(time_s)
@@ -174,9 +182,9 @@ class Cell(Entity):
 
                 q = ratio * BLOCK_SIZE_M * BLOCK_SIZE_M * (self.state.temperature - neighbor.state.temperature)
                 heat = q * time_s
-                neighbor.next_temps[num] += heat / (neighbor.material_properties.specific_heat *
+                neighbor.next_temps[num] += heat / (6 * neighbor.material_properties.specific_heat *
                                                     neighbor.material_properties.density * BLOCK_SIZE_M ** 3)
-                self.next_temps[num] -= heat / (self.material_properties.specific_heat *
+                self.next_temps[num] -= heat / (6 * self.material_properties.specific_heat *
                                                 self.material_properties.density * BLOCK_SIZE_M ** 3)
 
     def calculate_radiation_heat(self, time_s):
@@ -186,9 +194,15 @@ class Cell(Entity):
         q = RADIATION_CONSTANT * self.material_properties.emissivity * self.radiation_factor * pow(BLOCK_SIZE_M, 2) \
             * pow(self.state.temperature, 4)
         heat = q * time_s
+        for i in range(6):
+            self.next_temps[i] -= heat / (6 * self.material_properties.specific_heat *
+                                          self.material_properties.density * BLOCK_SIZE_M ** 3)
 
         Cell.radiation_sum += heat
 
-
     def calculate_radiation(self):
-        pass
+        heat = Cell.radiation_sum / Cell.rad_walls_sum
+        heat *= self.radiation_factor
+        for i in range(6):
+            self.next_temps[i] += heat / (6 * self.material_properties.specific_heat *
+                                          self.material_properties.density * BLOCK_SIZE_M ** 3)
