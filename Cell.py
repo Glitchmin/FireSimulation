@@ -23,6 +23,8 @@ class Voxel(Button):
 
 
 class Cell(Entity):
+    radiation_sum = 0
+
     def __init__(self, position, material_properties: MaterialProperties, state: StateProperties, **kwargs):
         super().__init__(**kwargs)
         self.material_properties = material_properties
@@ -173,10 +175,16 @@ class Cell(Entity):
                 self.next_temps[num] -= heat / (self.material_properties.specific_heat *
                                                 self.material_properties.density * BLOCK_SIZE_M ** 3)
 
-    def calculate_radiation(self, time_s):
+    def calculate_radiation_heat(self, time_s):
         if self.material_properties.is_gas() and not self.state.is_burning:
             return
 
-        q = RADIATION_CONSTANT * self.material_properties.emissivity * pow(BLOCK_SIZE_M, 2) \
+        q = RADIATION_CONSTANT * self.material_properties.emissivity * self.radiation_factor * pow(BLOCK_SIZE_M, 2) \
             * pow(self.state.temperature, 4)
         heat = q * time_s
+
+        Cell.radiation_sum += heat
+
+
+    def calculate_radiation(self):
+        pass
