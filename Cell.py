@@ -90,27 +90,27 @@ class Cell(Entity):
         is_ceiling_above = True
         for neighbor in self.neighbors:
             if neighbor is not None and neighbor.position[1] > self.position[1] \
-                    and neighbor.material_properties.id == 0:
+                    and neighbor.material_properties.is_gas():
                 is_ceiling_above = False
 
         intermediate_smoke = self.state.smoke_saturation
         for neighbor in self.neighbors:
-            if neighbor is not None:
-                if self.material_properties.id != 0 and neighbor.position[1] > self.position[1] and \
-                        neighbor.material_properties.id == 0 and self.state.is_burning:
+            if neighbor is not None and neighbor.material_properties.is_gas():
+                if not self.material_properties.is_gas() and neighbor.position[1] > self.position[1]\
+                        and self.state.is_burning:
                     neighbor.next_state.smoke_saturation += self.material_properties.smoke_generation_s * time_s
-                if self.material_properties.id == 0 and neighbor.position[1] > self.position[1] and \
-                        neighbor.material_properties.id == 0:
-                    if neighbor.state.smoke_saturation >= 1.0:
-                        intermediate_smoke += neighbor.state.smoke_saturation - 1.0
-                        neighbor.next_state.smoke_saturation = 1.0
-                    elif self.state.smoke_saturation != 0:
-                        neighbor.next_state.smoke_saturation += 0.8 * self.state.smoke_saturation
-                        intermediate_smoke -= 0.8 * self.state.smoke_saturation
-                        intermediate_smoke = max(0.0, intermediate_smoke)
+                if self.material_properties.is_gas():
+                    if neighbor.position[1] > self.position[1]:
+                        if self.state.smoke_saturation != 0 and neighbor.state.smoke_saturation < 1:
+                            neighbor.next_state.smoke_saturation += 0.8 * intermediate_smoke
+                            intermediate_smoke -= 0.8 * intermediate_smoke
+                    elif neighbor.position[1] < self.position[1]:
+                        if intermediate_smoke >= 1.0:
+                            neighbor.next_state.smoke_saturation += (intermediate_smoke - 1.0)/2
+                            intermediate_smoke -= (intermediate_smoke - 1.0)/2
         pre_neighbour_split_smoke = intermediate_smoke
         divider = 50
-        if self.material_properties.id == 0 and is_ceiling_above:
+        if self.material_properties.is_gas() and is_ceiling_above:
             divider = 6
         for neighbor in self.neighbors:
             if neighbor is not None:
