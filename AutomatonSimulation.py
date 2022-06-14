@@ -28,10 +28,13 @@ class AutomatonSimulation(threading.Thread):
                             if 0 <= z + k < self.block_environment.size[2]:
                                 self.block_environment.cells[x][y][z].add_neighbor(
                                     self.block_environment.cells[x][y][z + k])
+                        self.block_environment.cells[x][y][z].calc_rad_fact()
+                        print(x, y, z, self.block_environment.cells[x][y][z].radiation_factor)
+
     def next_10(self):
         self.next_step(100)
 
-    def next_step(self, n = 1):
+    def next_step(self, n=1):
         for i in range(n):
             for x in range(self.block_environment.size[0]):
                 for y in range(self.block_environment.size[1]):
@@ -61,7 +64,7 @@ class AutomatonSimulation(threading.Thread):
                             cell.state.temperature = sum(cell.next_temps) / 6
                             smoke_sum += cell.state.smoke_saturation
 
-            print(f"smoke sum: {smoke_sum}, diff: {smoke_sum-prev_smoke_sum}")
+            print(f"smoke sum: {smoke_sum}, diff: {smoke_sum - prev_smoke_sum}")
         self.block_environment.refresh_voxels()
 
     def run(self):

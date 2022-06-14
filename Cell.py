@@ -80,6 +80,10 @@ class Cell(Entity):
     def add_neighbor(self, neighbor):
         self.neighbors.append(neighbor)
 
+    def calc_rad_fact(self):
+        for neighbor in self.neighbors:
+            self.radiation_factor += neighbor.material_properties.is_gas()
+
     def calc_next_state(self, time_s):
         self.next_state.is_burning = self.state.temperature >= self.material_properties.autoignition_temp
 
