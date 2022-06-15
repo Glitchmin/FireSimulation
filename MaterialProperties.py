@@ -11,6 +11,7 @@ class MaterialProperties:
     density: float              # kg/m^3
     conductivity: float         # W/(m*K)
     autoignition_temp: float    # K
+    flash_temp: float    # K
     smoke_generation_s: float
     emissivity: float
     heat_generation_s: float

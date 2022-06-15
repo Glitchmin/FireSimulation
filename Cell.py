@@ -94,13 +94,24 @@ class Cell(Entity):
                 Cell.rad_walls_sum += 1
 
     def calc_next_state(self, time_s):
-        self.next_state.is_burning = self.state.temperature >= self.material_properties.autoignition_temp
+        self.calculate_is_burning()
 
         self.calculate_radiation()
         self.calculate_conduction(time_s)
         self.calculate_convection(time_s)
-        # self.calculate_smoke(time_s)
+        self.calculate_smoke(time_s)
         self.calculate_fire(time_s)
+
+    def calculate_is_burning(self):
+        flash_active = self.state.is_burning
+        for neighbor in self.neighbors:
+            if neighbor.state.is_burning:
+                flash_active = True
+
+        if flash_active:
+            self.next_state.is_burning = self.state.temperature >= self.material_properties.flash_temp
+        else:
+            self.next_state.is_burning = self.state.temperature >= self.material_properties.autoignition_temp
 
     def calculate_fire(self, time_s):
         if self.state.is_burning:
@@ -108,6 +119,16 @@ class Cell(Entity):
                 self.next_temps[i] += self.material_properties.heat_generation_s * time_s / (
                             self.material_properties.specific_heat *
                             self.material_properties.density * BLOCK_SIZE_M ** 3)
+        else:
+            igniters_counters = 0
+            for neighbor in self.neighbors:
+                if neighbor.state.temperature > self.material_properties.flash_temp and neighbor.state.is_burning:
+                    igniters_counters += 1
+
+            for i in range(6):
+                self.next_temps[i] += igniters_counters / 6 * self.material_properties.heat_generation_s * time_s / (
+                        self.material_properties.specific_heat *
+                        self.material_properties.density * BLOCK_SIZE_M ** 3)
 
     def calculate_smoke(self, time_s):
         if not self.material_properties.is_gas():
