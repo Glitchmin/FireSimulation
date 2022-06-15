@@ -11,7 +11,7 @@ class CellGenerator:
         self._building_material_id = 1
         self.empty_material = 0
         self.material_defs = {
-            0: MaterialProperties(0, "air", color=(0, 0, 0, 0.01), specific_heat=1.,
+            0: MaterialProperties(0, "air", color=(0, 0, 0, 0.0), specific_heat=1.,
                                   density=1.225,
                                   conductivity=0.025,
                                   autoignition_temp=inf, flash_temp=inf, smoke_generation_s=0.0, emissivity=0.0,

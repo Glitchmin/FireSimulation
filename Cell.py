@@ -3,7 +3,7 @@ from MaterialProperties import MaterialProperties
 from StateProperties import StateProperties
 from ColorToTemperature import ColorToTemperature
 from constants import BLOCK_SIZE_M, CONVECTION_VERTICAL_RATIO, CONVECTION_HORIZONTAL_RATIO, ROOM_TEMPERATURE, \
-    RADIATION_CONSTANT
+    RADIATION_CONSTANT, FLAME_MIN_TEMP
 
 
 class Voxel(Button):
@@ -70,14 +70,17 @@ class Cell(Entity):
             elif not self.material_properties.is_invisible():
                 self.voxel.color = color.color(*self.material_properties.color)
             elif smoke_saturation > 0.005 or self.state.smoke_saturation < 0:
+                saturation = 0.6 if self.state.temperature > FLAME_MIN_TEMP else 0
+                alpha_mul = 2. if self.state.temperature > FLAME_MIN_TEMP else 1.
                 if self.voxel is None:
                     self.voxel = Voxel(self.position, self.material_properties.color)
                 if self.state.smoke_saturation < 0:
                     self.voxel.color = color.color(200, 1, 1)
                 elif self.state.smoke_saturation > 1:
-                    self.voxel.color = color.color(0, 0, 0.6)
+
+                    self.voxel.color = color.color(0, saturation, min(1., alpha_mul*0.6))
                 else:
-                    self.voxel.color = color.color(0, 0, 0.5, self.state.smoke_saturation)
+                    self.voxel.color = color.color(0, saturation, min(1., alpha_mul*0.5), min(1., alpha_mul*self.state.smoke_saturation))
             elif self.voxel is not None:
                 destroy(self.voxel)
 

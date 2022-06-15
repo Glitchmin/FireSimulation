@@ -94,4 +94,4 @@ class AutomatonSimulation(threading.Thread):
 
     def run(self):
         while True:
-            self.next_step(30)
+            self.next_step(4)
