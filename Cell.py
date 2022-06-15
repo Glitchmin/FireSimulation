@@ -95,35 +95,34 @@ class Cell(Entity):
     def calc_next_state(self, time_s):
         self.next_state.is_burning = self.state.temperature >= self.material_properties.autoignition_temp
 
-        self.calculate_radiation()
+        # self.calculate_radiation()
         self.calculate_conduction(time_s)
-        self.calculate_convection(time_s)
-        self.calculate_smoke(time_s)
+        # self.calculate_convection(time_s)
+        # self.calculate_smoke(time_s)
         self.calculate_fire(time_s)
 
     def calculate_fire(self, time_s):
-        for i in range(6):
-            self.next_temps[i] += self.material_properties.heat_generation_s * time_s / (
-                        6 * self.material_properties.specific_heat *
-                        self.material_properties.density * BLOCK_SIZE_M ** 3)
+        if self.state.is_burning:
+            for i in range(6):
+                self.next_temps[i] += self.material_properties.heat_generation_s * time_s / (
+                            self.material_properties.specific_heat *
+                            self.material_properties.density * BLOCK_SIZE_M ** 3)
 
     def calculate_smoke(self, time_s):
         if not self.material_properties.is_gas():
             if self.state.is_burning:
-                print("is burning", self.position)
                 for neighbor in self.neighbors:
                     if neighbor is not None and neighbor.material_properties.is_gas() and\
                             neighbor.position[1] > self.position[1]:
-                        print("and is heating", self.position, self.material_properties.smoke_generation_s * time_s)
                         neighbor.next_state.smoke_saturation += self.material_properties.smoke_generation_s * time_s
             return
 
         is_ceiling_above = True
         for neighbor in self.neighbors:
             # if self.position == (0, 2, 0) and neighbor is not None:
-            if neighbor is not None and neighbor.position[1] > self.position[1] \
-                    and not neighbor.material_properties.is_gas():
-                print(">>>", neighbor.material_properties.is_gas(), neighbor.material_properties.id, self.position, "neigh: ", neighbor.position)
+            # if neighbor is not None and neighbor.position[1] > self.position[1] \
+            #         and not neighbor.material_properties.is_gas():
+                # print(">>>", neighbor.material_properties.is_gas(), neighbor.material_properties.id, self.position, "neigh: ", neighbor.position)
 
             if neighbor is not None and neighbor.position[1] > self.position[1] \
                     and neighbor.material_properties.is_gas():
@@ -175,8 +174,8 @@ class Cell(Entity):
             divider = 6
         # if not is_ceiling_above and neighbor_up_space < 0.9:
         #     divider = 6/(1-neighbor_up_space)
-        if pre_neighbor_split_smoke > 1 and pre_neighbor_split_smoke/divider*equal_y_neighbors > 0.9:
-            print("side propagated over excess smoke:", pre_neighbor_split_smoke, pre_neighbor_split_smoke/divider*equal_y_neighbors)
+        # if pre_neighbor_split_smoke > 1 and pre_neighbor_split_smoke/divider*equal_y_neighbors > 0.9:
+        #     print("side propagated over excess smoke:", pre_neighbor_split_smoke, pre_neighbor_split_smoke/divider*equal_y_neighbors)
         intermediate_smoke = self.divide_to_neighbors(divider, intermediate_smoke, pre_neighbor_split_smoke)
 
         self.next_state.smoke_saturation += (intermediate_smoke - self.state.smoke_saturation)
@@ -214,13 +213,20 @@ class Cell(Entity):
                 R = R1 + R2
                 U = 1 / R
                 q = U * BLOCK_SIZE_M * BLOCK_SIZE_M / 6 * (neighbor.state.temperature - self.state.temperature)
-                heat = q * time_s
+                control_const = 1 + 999*(not neighbor.material_properties.is_gas() and not self.material_properties.is_gas())
+                heat = control_const * q * time_s
+                sign = -1 if heat < 0 else (1 if heat > 0 else 0)
+                heat = sign * min(abs(heat), max(neighbor.state_heat(), self.state_heat(), 0))
                 if self.state.temperature > neighbor.state.temperature and heat > 0:
+                    print()
                     print("WRONG TEMP CONDUCTION DIRECTION")
                     print()
-                control_const = 1 + 999*(not neighbor.material_properties.is_gas() and not self.material_properties.is_gas())
-                self.next_temps[num] += control_const*heat / (self.material_properties.specific_heat *
+                self.next_temps[num] += heat / (self.material_properties.specific_heat *
                                                 self.material_properties.density * BLOCK_SIZE_M ** 3)
+
+    def state_heat(self):
+        return self.state.temperature * self.material_properties.specific_heat *\
+               self.material_properties.density * BLOCK_SIZE_M**3
 
     def calculate_convection(self, time_s):
         if not self.material_properties.is_gas():
@@ -237,6 +243,7 @@ class Cell(Entity):
 
                 q = ratio * BLOCK_SIZE_M * BLOCK_SIZE_M * (self.state.temperature - neighbor.state.temperature)
                 heat = q * time_s
+                heat = min(heat)
                 neighbor.next_temps[num] += heat / (6 * neighbor.material_properties.specific_heat *
                                                     neighbor.material_properties.density * BLOCK_SIZE_M ** 3)
                 self.next_temps[num] -= heat / (6 * self.material_properties.specific_heat *
