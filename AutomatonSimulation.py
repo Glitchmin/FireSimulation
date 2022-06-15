@@ -44,6 +44,7 @@ class AutomatonSimulation(threading.Thread):
 
     def next_step(self, n=1):
         for i in range(n):
+            Cell.radiation_sum = 0
             for x in range(self.block_environment.size[0]):
                 for y in range(self.block_environment.size[1]):
                     for z in range(self.block_environment.size[2]):
@@ -51,11 +52,11 @@ class AutomatonSimulation(threading.Thread):
                             cell: Cell = self.block_environment.cells[x][y][z]
                             cell.next_temps = [cell.state.temperature] * 6
 
-            # for x in range(self.block_environment.size[0]):
-            #     for y in range(self.block_environment.size[1]):
-            #         for z in range(self.block_environment.size[2]):
-            #             if self.block_environment.cells[x][y][z] is not None:
-            #                 self.block_environment.cells[x][y][z].calculate_radiation_heat(self.s_for_every_step)
+            for x in range(self.block_environment.size[0]):
+                for y in range(self.block_environment.size[1]):
+                    for z in range(self.block_environment.size[2]):
+                        if self.block_environment.cells[x][y][z] is not None:
+                            self.block_environment.cells[x][y][z].calculate_radiation_heat(self.s_for_every_step)
 
             for x in range(self.block_environment.size[0]):
                 for y in range(self.block_environment.size[1]):

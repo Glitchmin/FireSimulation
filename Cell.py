@@ -89,15 +89,16 @@ class Cell(Entity):
             return
 
         for neighbor in self.neighbors:
-            self.radiation_factor += neighbor.material_properties.is_gas()
-            Cell.rad_walls_sum += 1
+            if neighbor.material_properties.is_gas():
+                self.radiation_factor += 1
+                Cell.rad_walls_sum += 1
 
     def calc_next_state(self, time_s):
         self.next_state.is_burning = self.state.temperature >= self.material_properties.autoignition_temp
 
-        # self.calculate_radiation()
+        self.calculate_radiation()
         self.calculate_conduction(time_s)
-        # self.calculate_convection(time_s)
+        self.calculate_convection(time_s)
         # self.calculate_smoke(time_s)
         self.calculate_fire(time_s)
 
@@ -243,7 +244,9 @@ class Cell(Entity):
 
                 q = ratio * BLOCK_SIZE_M * BLOCK_SIZE_M * (self.state.temperature - neighbor.state.temperature)
                 heat = q * time_s
-                heat = min(heat)
+
+                sign = -1 if heat < 0 else (1 if heat > 0 else 0)
+                heat = sign * min(abs(heat), max(self.state_heat(), 0))
                 neighbor.next_temps[num] += heat / (6 * neighbor.material_properties.specific_heat *
                                                     neighbor.material_properties.density * BLOCK_SIZE_M ** 3)
                 self.next_temps[num] -= heat / (6 * self.material_properties.specific_heat *
@@ -257,7 +260,7 @@ class Cell(Entity):
             * pow(self.state.temperature, 4)
         heat = q * time_s
         for i in range(6):
-            self.next_temps[i] -= heat / (6 * self.material_properties.specific_heat *
+            self.next_temps[i] -= heat / (self.material_properties.specific_heat *
                                           self.material_properties.density * BLOCK_SIZE_M ** 3)
 
         Cell.radiation_sum += heat
@@ -266,5 +269,5 @@ class Cell(Entity):
         heat = Cell.radiation_sum / Cell.rad_walls_sum
         heat *= self.radiation_factor
         for i in range(6):
-            self.next_temps[i] += heat / (6 * self.material_properties.specific_heat *
+            self.next_temps[i] += heat / (self.material_properties.specific_heat *
                                           self.material_properties.density * BLOCK_SIZE_M ** 3)
