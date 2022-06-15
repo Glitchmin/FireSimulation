@@ -92,7 +92,6 @@ class Cell(Entity):
             self.radiation_factor += neighbor.material_properties.is_gas()
             Cell.rad_walls_sum += 1
 
-
     def calc_next_state(self, time_s):
         self.next_state.is_burning = self.state.temperature >= self.material_properties.autoignition_temp
 
@@ -100,6 +99,13 @@ class Cell(Entity):
         self.calculate_conduction(time_s)
         self.calculate_convection(time_s)
         self.calculate_smoke(time_s)
+        self.calculate_fire(time_s)
+
+    def calculate_fire(self, time_s):
+        for i in range(6):
+            self.next_temps[i] += self.material_properties.heat_generation_s * time_s / (
+                        6 * self.material_properties.specific_heat *
+                        self.material_properties.density * BLOCK_SIZE_M ** 3)
 
     def calculate_smoke(self, time_s):
         is_ceiling_above = True
@@ -164,7 +170,8 @@ class Cell(Entity):
                 if self.state.temperature > neighbor.state.temperature and heat > 0:
                     print("WRONG TEMP CONDUCTION DIRECTION")
                     print()
-                self.next_temps[num] += heat / (self.material_properties.specific_heat *
+                control_const = 1 + 999*(not neighbor.material_properties.is_gas() and not self.material_properties.is_gas())
+                self.next_temps[num] += control_const*heat / (self.material_properties.specific_heat *
                                                 self.material_properties.density * BLOCK_SIZE_M ** 3)
 
     def calculate_convection(self, time_s):

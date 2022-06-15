@@ -71,7 +71,7 @@ class AutomatonSimulation(threading.Thread):
                             cell.state.temperature = sum(cell.next_temps) / 6
                             smoke_sum += cell.state.smoke_saturation
 
-            print(f"smoke sum: {smoke_sum}, diff: {smoke_sum - prev_smoke_sum}")
+            #print(f"smoke sum: {smoke_sum}, diff: {smoke_sum - prev_smoke_sum}")
         self.block_environment.refresh_voxels()
 
     def run(self):

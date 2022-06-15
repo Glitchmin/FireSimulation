@@ -13,6 +13,7 @@ class MaterialProperties:
     autoignition_temp: float    # K
     smoke_generation_s: float
     emissivity: float
+    heat_generation_s: float
 
     def is_transparent(self):
         return len(self.color) >= 4 and self.color[3] < 1
